@@ -2,11 +2,17 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAccounts } from "@/lib/accounts";
+import { accountId, saveAccount, useAccounts } from "@/lib/accounts";
 import { AgentError, agentTurn, type WireMessage } from "@/lib/agent/client";
 import { buildSystemPrompt } from "@/lib/agent/prompt";
 import { readApiKey, useAgentSettings, writeApiKey } from "@/lib/agent/settings";
-import { AGENT_TOOLS, TOOL_LABELS, runTool, type AgentCatalog, type ToolContext } from "@/lib/agent/tools";
+import {
+  AGENT_TOOLS,
+  TOOL_LABELS,
+  runTool,
+  type AgentCatalog,
+  type ToolContext,
+} from "@/lib/agent/tools";
 import { useManualDrafts } from "@/lib/manualDrafts";
 import { GAMES } from "@/lib/site";
 import { storeKey, useLocalStore } from "@/lib/storage";
@@ -37,6 +43,9 @@ export function AgentWorkspace({
   const [reloadKey, setReloadKey] = useState(0);
   const [busy, setBusy] = useState(false);
   const [apiKey, setApiKeyState] = useState("");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [seed, setSeed] = useState<{ text: string; token: number } | undefined>();
   const controllerRef = useRef<AbortController | null>(null);
 
   const { settings, setSettings } = useAgentSettings(game);
@@ -97,6 +106,18 @@ export function AgentWorkspace({
       });
     return () => controller.abort();
   }, [game, uid, reloadKey]);
+
+  useEffect(() => {
+    if (!settingsOpen && !accountOpen) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSettingsOpen(false);
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [accountOpen, settingsOpen]);
 
   const toolContext = useMemo<ToolContext | null>(() => {
     if (!profile) return null;
@@ -207,7 +228,7 @@ export function AgentWorkspace({
                   ...item,
                   pending: false,
                   error: agentError?.message ?? "Something went wrong talking to the provider.",
-                  hint: agentError?.hint ?? "Check the provider settings on the left.",
+                  hint: agentError?.hint ?? "Check the provider settings.",
                 }
               : item,
           ),
@@ -220,30 +241,23 @@ export function AgentWorkspace({
     [apiKey, busy, drafts, game, messages, setMessages, settings, toolContext],
   );
 
-  const gameAccounts = accounts.filter((account) => account.game === game);
-  const roster = toolContext?.profile.characters.map((character) => ({
-    id: character.id,
-    name: character.name,
-  })) ?? [];
+  const roster =
+    toolContext?.profile.characters.map((character) => ({
+      id: character.id,
+      name: character.name,
+    })) ?? [];
   const focusName = roster.find((entry) => entry.id === initialFocus)?.name;
   const initialText = focusName ? `Tell me about @${focusName}` : "";
+  const configured = Boolean(settings.model.trim() && apiKey.trim());
+  const currentSaved = accounts.some((account) => account.id === accountId(game, uid));
+  const current = accounts.find((account) => account.id === accountId(game, uid));
+  const gameAccounts = accounts.filter((account) => account.game === game);
 
   return (
-    <div className="shell py-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="label">Build agent</p>
-          <h1 className="mt-2 font-display text-2xl font-semibold sm:text-3xl">
-            Ask about your builds.
-          </h1>
-          <p className="mt-2 max-w-xl text-[12.5px] leading-relaxed text-muted">
-            Your own model, reading your own showcase. It can look up any pinned character, compare a
-            lineup and search the game&apos;s discs and engines — then tell you what to fix.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="inline-flex rounded-lg border border-white/10 bg-black/40 p-1">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <header className="shrink-0 border-b border-white/[0.06] bg-[#07070c]/70 backdrop-blur">
+        <div className="shell flex flex-wrap items-center gap-2 py-2.5">
+          <div className="flex rounded-lg border border-white/10 bg-black/40 p-0.5">
             {(Object.keys(GAMES) as Game[]).map((key) => (
               <button
                 key={key}
@@ -253,7 +267,7 @@ export function AgentWorkspace({
                   setUid("");
                   setProfile(null);
                 }}
-                className={`btn px-3 py-1.5 text-[11.5px] ${
+                className={`rounded-md px-2.5 py-1 font-display text-[11px] tracking-[0.04em] transition-colors ${
                   game === key ? "bg-white/10 text-white" : "text-muted hover:text-white"
                 }`}
               >
@@ -262,109 +276,254 @@ export function AgentWorkspace({
             ))}
           </div>
 
-          {gameAccounts.length ? (
-            <select
-              value={uid}
-              onChange={(event) => setUid(event.target.value)}
-              aria-label="Account"
-              className="rounded-lg border border-white/10 bg-black/40 px-2.5 py-1.5 text-[11.5px] text-white/80 outline-none focus:border-white/25"
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setAccountOpen((value) => !value)}
+              className="flex h-9 max-w-[240px] items-center gap-2 overflow-hidden rounded-lg border border-white/10 bg-black/30 pl-1.5 pr-2 transition-colors hover:border-white/25"
             >
-              {gameAccounts.map((account) => (
-                <option key={account.id} value={account.uid}>
-                  {account.nickname || `UID ${account.uid}`}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <Link href="/" className="btn btn-ghost px-3 py-1.5 text-[11.5px]">
-              Save an account first
-            </Link>
-          )}
-        </div>
-      </div>
+              <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-white/15 bg-white/[0.06] font-display text-[10px] text-white/80">
+                {(profile?.player.nickname || `U${uid}`).slice(0, 1).toUpperCase()}
+              </span>
+              <span className="min-w-0 text-left">
+                <span className="block truncate text-[11px] leading-[1.25] text-white/90">
+                  {profile?.player.nickname || (uid ? `UID ${uid}` : "No account")}
+                </span>
+                <span className="block truncate text-[9px] leading-[1.3] text-faint">
+                  {status === "loading"
+                    ? "loading…"
+                    : profile
+                      ? `${profile.characters.length} on showcase${currentSaved ? "" : " · not saved"}`
+                      : "pick an account"}
+                </span>
+              </span>
+              <Chevron />
+            </button>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[330px_minmax(0,1fr)]">
-        <div className="space-y-4">
-          <AgentConfig
-            game={game}
-            settings={settings}
-            onChange={updateSettings}
-            apiKey={apiKey}
-            onKeyChange={updateKey}
-          />
-
-          <section className="panel p-4">
-            <p className="label">Context</p>
-            {status === "ready" && profile ? (
+            {accountOpen ? (
               <>
-                <p className="mt-2 text-[12.5px] text-white/90">
-                  {profile.player.nickname} · {GAMES[game].short} · UID {profile.player.uid}
-                </p>
-                <p className="mt-1 text-[10.5px] text-faint">
-                  {profile.characters.length} {game === "zzz" ? "agents" : "characters"} on the
-                  showcase
-                  {drafts.length ? ` · ${drafts.length} saved manual build${drafts.length === 1 ? "" : "s"}` : ""}
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {profile.characters.map((character) => (
-                    <span
-                      key={character.id}
-                      className="rounded-sm border border-white/[0.07] bg-black/40 px-1.5 py-0.5 text-[10px] text-white/65"
+                <button
+                  type="button"
+                  aria-label="Close account menu"
+                  onClick={() => setAccountOpen(false)}
+                  className="fixed inset-0 z-20 cursor-default"
+                />
+                <div className="absolute left-0 top-full z-30 mt-1.5 w-64 rounded-xl border border-white/10 bg-[#0b0b13] p-1.5 shadow-2xl">
+                  <p className="px-2 py-1 text-[9.5px] uppercase tracking-[0.14em] text-faint">
+                    {GAMES[game].short} accounts
+                  </p>
+                  {gameAccounts.length ? (
+                    gameAccounts.map((account) => (
+                      <button
+                        key={account.id}
+                        type="button"
+                        onClick={() => {
+                          setUid(account.uid);
+                          setAccountOpen(false);
+                        }}
+                        className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[11.5px] transition-colors ${
+                          account.uid === uid
+                            ? "bg-white/[0.08] text-white"
+                            : "text-white/70 hover:bg-white/[0.05] hover:text-white"
+                        }`}
+                      >
+                        <span className="min-w-0 flex-1 truncate">
+                          {account.nickname || `UID ${account.uid}`}
+                        </span>
+                        <span className="num text-[9.5px] text-faint">{account.uid}</span>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="px-2 py-1.5 text-[10.5px] text-faint">Nothing saved yet.</p>
+                  )}
+
+                  <div className="my-1 h-px bg-white/[0.07]" />
+
+                  {uid && !currentSaved ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        saveAccount(game, uid, profile?.player.nickname ?? "");
+                        setAccountOpen(false);
+                      }}
+                      className="w-full rounded-md px-2 py-1.5 text-left text-[11.5px] text-[#7cf5d0] transition-colors hover:bg-white/[0.05]"
                     >
-                      {character.name}
-                    </span>
-                  ))}
+                      Save this account
+                    </button>
+                  ) : null}
+                  <Link
+                    href="/"
+                    className="block rounded-md px-2 py-1.5 text-[11.5px] text-muted transition-colors hover:bg-white/[0.05] hover:text-white"
+                  >
+                    Add another UID
+                  </Link>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setReloadKey((value) => value + 1)}
-                  className="btn btn-ghost mt-3 w-full px-3 py-1.5 text-[11px]"
-                >
-                  Refresh showcase
-                </button>
               </>
-            ) : status === "loading" ? (
-              <p className="mt-2 text-[11.5px] text-faint">Loading your showcase…</p>
-            ) : status === "error" ? (
-              <>
-                <p className="mt-2 text-[11.5px] text-[#ffb3a3]">{loadError}</p>
-                <button
-                  type="button"
-                  onClick={() => setReloadKey((value) => value + 1)}
-                  className="btn btn-ghost mt-2 px-3 py-1.5 text-[11px]"
-                >
-                  Try again
-                </button>
-              </>
-            ) : (
-              <p className="mt-2 text-[11.5px] leading-relaxed text-faint">
-                {hydrated && !gameAccounts.length
-                  ? "Save a UID on the home page and it shows up here."
-                  : "Pick an account to load its showcase."}
-              </p>
-            )}
-          </section>
+            ) : null}
+          </div>
+
+          <div className="ml-auto flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => setSettingsOpen(true)}
+              className="flex items-center gap-2 rounded-lg border border-white/10 bg-black/30 px-2.5 py-1.5 text-[11px] text-white/80 transition-colors hover:border-white/25"
+            >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${configured ? "bg-[#7cf5d0]" : "bg-[#ffd977]"}`}
+              />
+              <span className="max-w-[170px] truncate">
+                {configured ? settings.model : "Set up provider"}
+              </span>
+              <Gear />
+            </button>
+            <button
+              type="button"
+              onClick={() => setMessages([])}
+              disabled={!messages.length || busy}
+              className="btn btn-ghost px-2.5 py-1.5 text-[11px] disabled:opacity-40"
+            >
+              New chat
+            </button>
+          </div>
         </div>
+      </header>
 
-        <AgentChat
-          key={chatKey}
-          messages={messages}
-          roster={roster}
-          busy={busy}
-          disabled={!toolContext}
-          disabledReason={status === "loading" ? "Loading your showcase…" : "Pick an account to start."}
-          initialText={initialText}
-          onSend={send}
-          onStop={() => controllerRef.current?.abort()}
-          onClear={() => setMessages([])}
-        />
-      </div>
+      <AgentChat
+        key={chatKey}
+        messages={messages}
+        roster={roster}
+        busy={busy}
+        model={configured ? settings.model : ""}
+        disabled={!toolContext}
+        disabledReason={
+          status === "loading"
+            ? "Loading your showcase…"
+            : status === "error"
+              ? loadError
+              : "Pick an account to start."
+        }
+        initialText={initialText}
+        seed={seed}
+        onSeed={(text) => setSeed({ text, token: Date.now() })}
+        onSend={send}
+        onStop={() => controllerRef.current?.abort()}
+        onClear={() => setMessages([])}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
 
-      <p className="mt-6 text-[11px] leading-relaxed text-faint">
-        The agent only sees what this browser can see: your public showcase and any manual builds
-        saved here. Replies come from the model you configured — check its work before you rebuild
-        anything.
-      </p>
+      {settingsOpen ? (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <button
+            type="button"
+            aria-label="Close settings"
+            onClick={() => setSettingsOpen(false)}
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          />
+          <aside className="relative flex h-full w-full max-w-[420px] animate-fade-up flex-col overflow-y-auto border-l border-white/10 bg-[#08080f]">
+            <div className="flex items-center justify-between border-b border-white/[0.07] px-4 py-3">
+              <div>
+                <p className="label">Agent settings</p>
+                <p className="mt-0.5 text-[10.5px] text-faint">
+                  {GAMES[game].short} · stored in this browser
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                className="btn btn-ghost h-7 w-7 p-0 text-[12px]"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="px-4 py-4">
+              <AgentConfig
+                game={game}
+                settings={settings}
+                onChange={updateSettings}
+                apiKey={apiKey}
+                onKeyChange={updateKey}
+              />
+            </div>
+
+            <div className="mt-auto space-y-3 border-t border-white/[0.07] px-4 py-4">
+              <div>
+                <p className="label">Context</p>
+                {profile ? (
+                  <>
+                    <p className="mt-1.5 text-[11.5px] text-white/85">
+                      {profile.player.nickname} · UID {profile.player.uid}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap gap-1">
+                      {profile.characters.map((character) => (
+                        <span
+                          key={character.id}
+                          className="rounded-sm border border-white/[0.07] bg-black/40 px-1.5 py-0.5 text-[10px] text-white/60"
+                        >
+                          {character.name}
+                        </span>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setReloadKey((value) => value + 1)}
+                      className="btn btn-ghost mt-2 w-full px-3 py-1.5 text-[10.5px]"
+                    >
+                      Refresh showcase
+                    </button>
+                  </>
+                ) : (
+                  <p className="mt-1.5 text-[10.5px] text-faint">
+                    {status === "error" ? loadError : "No showcase loaded yet."}
+                  </p>
+                )}
+              </div>
+
+              <p className="text-[10px] leading-relaxed text-faint">
+                The agent only sees what this browser can see: your public showcase and manual builds
+                saved here. Requests go straight to your provider — Astra never sees your key. The
+                relay is a pass-through you only need when a provider blocks browser calls. ZZZ and
+                HSR keep separate settings and chats.
+              </p>
+              {hydrated ? null : <p className="text-[10px] text-faint">Loading saved accounts…</p>}
+            </div>
+          </aside>
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function Chevron() {
+  return (
+    <svg
+      width="9"
+      height="9"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      className="text-white/35"
+    >
+      <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Gear() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      className="text-white/40"
+    >
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+    </svg>
   );
 }

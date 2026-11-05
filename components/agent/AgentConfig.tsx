@@ -3,22 +3,19 @@
 import { useState } from "react";
 import { AgentError, chatCompletion } from "@/lib/agent/client";
 import { modelsEndpoint, type AgentSettings } from "@/lib/agent/settings";
-import { GAMES } from "@/lib/site";
-import type { Game } from "@/lib/types";
 
 const FIELD =
-  "w-full rounded-md border border-white/10 bg-black/40 px-2.5 py-1.5 text-[12px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-white/25";
+  "w-full rounded-lg border border-white/10 bg-black/40 px-2.5 py-2 text-[12px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-white/25";
 
 type Status = { kind: "idle" | "busy" | "ok" | "error"; message: string; hint?: string };
 
 export function AgentConfig({
-  game,
   settings,
   onChange,
   apiKey,
   onKeyChange,
 }: {
-  game: Game;
+  game?: string;
   settings: AgentSettings;
   onChange: (patch: Partial<AgentSettings>) => void;
   apiKey: string;
@@ -82,17 +79,11 @@ export function AgentConfig({
   }
 
   return (
-    <section className="panel p-4">
-      <div className="flex items-center justify-between">
-        <p className="label">Provider · {GAMES[game].short} agent</p>
-        <span className="text-[10px] text-faint">saved in this browser</span>
-      </div>
-
-      <div className="mt-3 space-y-2.5">
+    <div className="space-y-5">
+      <section className="space-y-2.5">
+        <p className="label">Provider</p>
         <label className="block">
-          <span className="mb-1 block text-[10px] uppercase tracking-[0.1em] text-faint">
-            Base URL
-          </span>
+          <span className="mb-1 block text-[10.5px] text-faint">Base URL</span>
           <input
             value={settings.baseUrl}
             onChange={(event) => onChange({ baseUrl: event.target.value })}
@@ -103,12 +94,12 @@ export function AgentConfig({
         </label>
 
         <label className="block">
-          <span className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.1em] text-faint">
+          <span className="mb-1 flex items-center justify-between text-[10.5px] text-faint">
             <span>Model</span>
             <button
               type="button"
               onClick={loadModels}
-              className="normal-case tracking-normal text-[10px] text-[#7cf5d0] hover:text-white"
+              className="text-[10px] text-[#7cf5d0] hover:text-white"
             >
               Load models
             </button>
@@ -129,12 +120,12 @@ export function AgentConfig({
         </label>
 
         <label className="block">
-          <span className="mb-1 flex items-center justify-between text-[10px] uppercase tracking-[0.1em] text-faint">
+          <span className="mb-1 flex items-center justify-between text-[10.5px] text-faint">
             <span>API key</span>
             <button
               type="button"
               onClick={() => setShowKey((value) => !value)}
-              className="normal-case tracking-normal text-[10px] text-muted hover:text-white"
+              className="text-[10px] text-muted hover:text-white"
             >
               {showKey ? "hide" : "show"}
             </button>
@@ -149,34 +140,35 @@ export function AgentConfig({
             className={`${FIELD} num`}
           />
         </label>
+      </section>
 
-        <div className="space-y-1.5 pt-1">
-          <Toggle
-            label="Stream replies"
-            checked={settings.stream}
-            onChange={(stream) => onChange({ stream })}
-          />
-          <Toggle
-            label="Keep the key after closing the tab"
-            checked={settings.rememberKey}
-            onChange={(rememberKey) => onChange({ rememberKey })}
-          />
-          <Toggle
-            label="Relay through Astra (use if the browser is blocked)"
-            checked={settings.viaRelay}
-            onChange={(viaRelay) => onChange({ viaRelay })}
-          />
-        </div>
+      <section className="space-y-1 border-t border-white/[0.07] pt-3.5">
+        <p className="label mb-1">Behaviour</p>
+        <Switch
+          label="Stream replies"
+          checked={settings.stream}
+          onChange={(stream) => onChange({ stream })}
+        />
+        <Switch
+          label="Keep the key after closing the tab"
+          checked={settings.rememberKey}
+          onChange={(rememberKey) => onChange({ rememberKey })}
+        />
+        <Switch
+          label="Relay through Astra (if the browser is blocked)"
+          checked={settings.viaRelay}
+          onChange={(viaRelay) => onChange({ viaRelay })}
+        />
+      </section>
 
-        <div className="flex flex-wrap gap-2 pt-1">
-          <button type="button" onClick={test} className="btn btn-primary px-3 py-1.5 text-[11.5px]">
-            Test connection
-          </button>
-        </div>
+      <section className="border-t border-white/[0.07] pt-3.5">
+        <button type="button" onClick={test} className="btn btn-primary w-full px-3 py-2 text-[11.5px]">
+          Test connection
+        </button>
 
         {status.kind !== "idle" ? (
           <div
-            className={`rounded-md border px-2.5 py-2 text-[10.5px] leading-relaxed ${
+            className={`mt-2 rounded-lg border px-2.5 py-2 text-[10.5px] leading-relaxed ${
               status.kind === "error"
                 ? "border-[#ff8f7a]/30 bg-[#ff8f7a]/10 text-[#ffb3a3]"
                 : status.kind === "ok"
@@ -188,17 +180,12 @@ export function AgentConfig({
             {status.hint ? <p className="mt-1 text-white/45">{status.hint}</p> : null}
           </div>
         ) : null}
-
-        <p className="text-[10px] leading-relaxed text-faint">
-          Requests go straight from this browser to your provider; Astra never sees your key. The
-          relay is a pass-through you only need when a provider blocks browser calls.
-        </p>
-      </div>
-    </section>
+      </section>
+    </div>
   );
 }
 
-function Toggle({
+function Switch({
   label,
   checked,
   onChange,
@@ -208,14 +195,25 @@ function Toggle({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <label className="flex items-center gap-2 text-[11px] text-muted">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(event) => onChange(event.target.checked)}
-        className="h-3.5 w-3.5 accent-[#7cf5d0]"
-      />
-      {label}
-    </label>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className="flex w-full items-center justify-between gap-3 py-1.5 text-left"
+    >
+      <span className="text-[11.5px] text-muted">{label}</span>
+      <span
+        className={`relative h-4 w-7 shrink-0 rounded-full transition-colors ${
+          checked ? "bg-[#7cf5d0]" : "bg-white/15"
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 h-3 w-3 rounded-full bg-[#05050a] transition-all ${
+            checked ? "left-3.5" : "left-0.5"
+          }`}
+        />
+      </span>
+    </button>
   );
 }
