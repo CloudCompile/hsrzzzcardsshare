@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ShowcaseProfile } from "@/lib/types";
 import { Markdown } from "./Markdown";
 
 export interface ChatItem {
@@ -16,6 +17,7 @@ export interface ChatItem {
 export function AgentChat({
   messages,
   roster,
+  profile,
   busy,
   model,
   disabled,
@@ -30,6 +32,7 @@ export function AgentChat({
 }: {
   messages: ChatItem[];
   roster: { id: string; name: string }[];
+  profile?: ShowcaseProfile | null;
   busy: boolean;
   model: string;
   disabled: boolean;
@@ -199,7 +202,7 @@ export function AgentChat({
 
                     {message.content ? (
                       <div className="border-l border-white/[0.09] pl-3">
-                        <Markdown text={message.content} />
+                        <Markdown text={message.content} profile={profile} />
                       </div>
                     ) : null}
 

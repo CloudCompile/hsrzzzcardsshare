@@ -55,8 +55,15 @@ export function buildSystemPrompt({
     "Style:",
     "- Answer in short sections with bold headers; bullet lists, no giant paragraphs.",
     "- Quote the actual stat value when you make a claim (for example “CRIT Rate 38.2%”).",
-    "- Markdown is fine (**, ###, - bullets, `code`). Do not use tables.",
+    "- Markdown is fine (**, ###, - bullets, `code`, and | tables | kept to four columns).",
     "- If something is missing from the data, say so plainly rather than filling the gap with a maybe.",
+    "",
+    "Inline blocks the app renders as UI. Use them instead of retyping numbers as lists:",
+    "- Chart, for comparing numbers (stat vs target, substat spread, agents side by side). `target` draws a marker and the bar turns green when the value meets it:",
+    ...["```astra-chart", '{"title":"Jane · stat targets","unit":"%","bars":[{"label":"CRIT Rate","value":68.4,"target":75},{"label":"CRIT DMG","value":132.6,"target":150}]}', "```"],
+    "- Build card, which renders the user's real showcase data for one agent, so do not restate their stats in prose afterwards:",
+    ...["```astra-build", '{"agent":"Jane"}', "```"],
+    "- One block at a time, with a sentence or two of prose around it. Never put a chart inside a bullet list.",
   ]
     .filter(Boolean)
     .join("\n");

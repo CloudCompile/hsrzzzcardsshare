@@ -392,6 +392,7 @@ export function AgentWorkspace({
         key={chatKey}
         messages={messages}
         roster={roster}
+        profile={profile}
         busy={busy}
         model={configured ? settings.model : ""}
         disabled={!toolContext}
