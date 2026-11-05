@@ -33,27 +33,33 @@ function Stars({ count }: { count: number }) {
   );
 }
 
-function StatLine({ row }: { row: StatRow }) {
+function StatLine({ row, compact = false }: { row: StatRow; compact?: boolean }) {
   return (
     <div
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        padding: "8px 12px",
-        marginBottom: 6,
+        padding: compact ? "5px 10px" : "8px 12px",
+        marginBottom: compact ? 5 : 6,
         borderRadius: 8,
         background: PANEL,
         border: LINE,
       }}
     >
-      <div style={{ display: "flex", fontSize: 15, color: "#9a97ad", letterSpacing: 1 }}>
+      <div style={{ display: "flex", fontSize: compact ? 13.5 : 15, color: "#9a97ad", letterSpacing: 1 }}>
         {row.label}
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-        <div style={{ display: "flex", fontSize: 22, fontWeight: 600, color: "#ffffff" }}>{row.value}</div>
+        <div
+          style={{ display: "flex", fontSize: compact ? 19 : 22, fontWeight: 600, color: "#ffffff" }}
+        >
+          {row.value}
+        </div>
         {row.detail ? (
-          <div style={{ display: "flex", fontSize: 12, color: "#6f6f86", marginTop: 1 }}>{row.detail}</div>
+          <div style={{ display: "flex", fontSize: compact ? 10.5 : 12, color: "#6f6f86", marginTop: 1 }}>
+            {row.detail}
+          </div>
         ) : null}
       </div>
     </div>
@@ -527,7 +533,7 @@ export function portraitCard({
   const columnWidth = Math.floor((contentWidth - 10) / 2);
   const accent = character.accent;
   const isZzz = character.kind === "zzz";
-  const bannerHeight = 400;
+  const bannerHeight = isZzz ? 344 : 372;
   const stats = character.sheet.slice(0, 11);
   const statColumns = [stats.slice(0, 6), stats.slice(6)];
   const gear = character.gear.slice(0, 6);
@@ -553,13 +559,35 @@ export function portraitCard({
         <div
           style={{ display: "flex", position: "relative", width, height: bannerHeight, overflow: "hidden" }}
         >
-          {character.portrait ? (
+          {isZzz ? (
+            // A tall standing pose loses its face to a wide crop, so ZZZ uses the
+            // square character icon as a medallion instead.
+            character.icon ? (
+              <div
+                style={{
+                  position: "absolute",
+                  top: 38,
+                  right: 46,
+                  display: "flex",
+                  width: 256,
+                  height: 256,
+                  borderRadius: 999,
+                  overflow: "hidden",
+                  border: `2px solid ${accent}88`,
+                  backgroundColor: "#0b0b12",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={character.icon} width={256} height={256} style={{ objectFit: "cover" }} />
+              </div>
+            ) : null
+          ) : character.portrait ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={character.portrait}
               width={width}
               height={bannerHeight}
-              style={{ objectFit: "cover", objectPosition: isZzz ? "center 10%" : "center top" }}
+              style={{ objectFit: "cover" }}
             />
           ) : null}
           <div
@@ -655,7 +683,7 @@ export function portraitCard({
                 }}
               >
                 {column.map((row) => (
-                  <StatLine key={row.label} row={row} />
+                  <StatLine key={row.label} row={row} compact />
                 ))}
               </div>
             ))}
