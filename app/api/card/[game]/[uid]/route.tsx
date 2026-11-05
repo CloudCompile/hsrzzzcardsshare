@@ -3,6 +3,7 @@ import { getShowcase, normalizeUid } from "@/lib/enka";
 import { buildManualProfile, manualCatalog } from "@/lib/manual";
 import { decodeBuild } from "@/lib/manualCodec";
 import { detailCard, portraitCard } from "@/lib/cards/detail";
+import { applyCharacterEdit, decodeEdits, singleEdit } from "@/lib/edits";
 import { teamCard } from "@/lib/cards/team";
 import { GAMES, TEAM_SIZE, isGame } from "@/lib/site";
 import type { Character, Game, ShowcaseProfile } from "@/lib/types";
@@ -437,12 +438,18 @@ export async function GET(
   const agentId = url.searchParams.get("agent");
   const teamParam = url.searchParams.get("team");
   const title = url.searchParams.get("title") ?? "";
+  // A download can carry the browser's local corrections; share links never do.
+  const editRaw = url.searchParams.get("e");
+  const localEdit = editRaw ? singleEdit(decodeEdits(editRaw)) : null;
 
   let response: ImageResponse;
   let filename = `astra-${game}-${normalized}.png`;
 
   if (agentId) {
-    const character = profile.characters.find((item) => item.id === agentId) ?? profile.characters[0];
+    const character = applyCharacterEdit(
+      profile.characters.find((item) => item.id === agentId) ?? profile.characters[0],
+      localEdit,
+    );
     response = portrait
       ? portraitCard({ character, profile, game })
       : detail

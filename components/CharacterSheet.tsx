@@ -1,22 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
+import { CharacterCorrections } from "./CharacterCorrections";
 import { Stars, StatGrid } from "./ui";
 import { CopyButton } from "./CopyButton";
 import { fmtInt } from "@/lib/format";
-import type { Character } from "@/lib/types";
+import { editParam, type CharacterEdit } from "@/lib/edits";
+import type { Character, Game } from "@/lib/types";
 
 export function CharacterSheet({
   character,
   game,
   uid,
   shareUrl,
+  edit,
   onClose,
 }: {
   character: Character | null;
-  game: string;
+  game: Game;
   uid: string;
   shareUrl: string;
+  edit?: CharacterEdit | null;
   onClose: () => void;
 }) {
   useEffect(() => {
@@ -36,9 +40,12 @@ export function CharacterSheet({
   if (!character) return null;
 
   const accent = character.accent;
-  const png = `/api/card/${game}/${uid}?agent=${character.id}&download=1`;
-  const detailPng = `/api/card/${game}/${uid}?agent=${character.id}&view=detail&download=1`;
-  const portraitPng = `/api/card/${game}/${uid}?agent=${character.id}&view=portrait&download=1`;
+  // Corrections ride along with the download only, never with the share URL.
+  const corrections = editParam(edit);
+  const suffix = corrections ? `&e=${corrections}` : "";
+  const png = `/api/card/${game}/${uid}?agent=${character.id}&download=1${suffix}`;
+  const detailPng = `/api/card/${game}/${uid}?agent=${character.id}&view=detail&download=1${suffix}`;
+  const portraitPng = `/api/card/${game}/${uid}?agent=${character.id}&view=portrait&download=1${suffix}`;
   const characterShare = `${shareUrl.split("?")[0]}?agent=${character.id}`;
 
   return (
@@ -124,6 +131,12 @@ export function CharacterSheet({
               Portrait
             </a>
             <CopyButton value={characterShare} label="Copy card link" />
+            <a
+              href={`/agent?game=${game}&uid=${uid}&focus=${character.id}`}
+              className="btn btn-ghost px-3 py-2 text-[12px]"
+            >
+              Ask the agent
+            </a>
           </div>
         </div>
 
@@ -136,6 +149,9 @@ export function CharacterSheet({
                 ? "Calculated from agent level, promotion, core skill, drive discs and 2pc set bonuses. W-Engine passives are not included."
                 : "Calculated from character level, light cone, traces, relics and set bonuses."}
             </p>
+            <div className="mt-3">
+              <CharacterCorrections character={character} game={game} uid={uid} />
+            </div>
           </section>
 
           {character.weapon ? (

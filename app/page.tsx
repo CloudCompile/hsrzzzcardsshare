@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { SavedAccounts } from "@/components/SavedAccounts";
+import { SiteNav } from "@/components/SiteNav";
 import { UidForm } from "@/components/UidForm";
 import { GAMES } from "@/lib/site";
 import zzzJson from "@/lib/data/zzz.json";
@@ -53,7 +55,7 @@ const steps = [
 const faqs = [
   {
     q: "Is this safe? Do I need to log in?",
-    a: "No login. The showcase is public data that the game already exposes, and we only ever read your UID against Enka.Network's public API. Your UID alone can't be used to access your account.",
+    a: "No login. The showcase is public data that the game already exposes, and we only ever read your UID against Enka.Network's public API. Your UID alone can't be used to access your account. Saved accounts, stat corrections, manual builds and agent settings live in your browser's local storage — nothing is held on our servers.",
   },
   {
     q: "Why are only a few characters showing?",
@@ -79,30 +81,14 @@ export default function HomePage() {
       </div>
 
       <header className="relative">
-        <div className="shell flex items-center justify-between py-5">
-          <div className="flex items-center gap-2.5">
-            <span className="relative grid h-8 w-8 place-items-center rounded-lg border border-white/15 bg-black/50">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M12 2.6l2.5 5.9 6.4.6-4.8 4.3 1.4 6.3L12 16.6 6.5 19.7l1.4-6.3L3.1 9.1l6.4-.6z"
-                  fill="#7cf5d0"
-                />
-              </svg>
-            </span>
-            <span className="font-display text-[17px] font-semibold tracking-[0.1em]">ASTRA</span>
-          </div>
-          <nav className="flex items-center gap-1 text-[12px] text-muted sm:gap-4">
-            <a href="#how" className="hidden px-2 py-1 transition-colors hover:text-white sm:block">
-              How it works
-            </a>
-            <a href="#faq" className="hidden px-2 py-1 transition-colors hover:text-white sm:block">
-              FAQ
-            </a>
-            <a href="#lookup" className="btn btn-ghost px-3 py-1.5 text-[12px]">
-              Open showcase
-            </a>
-          </nav>
-        </div>
+        <SiteNav>
+          <a href="#how" className="hidden px-2 py-1 transition-colors hover:text-white sm:block">
+            How it works
+          </a>
+          <a href="#faq" className="hidden px-2 py-1 transition-colors hover:text-white sm:block">
+            FAQ
+          </a>
+        </SiteNav>
       </header>
 
       <section className="relative">
@@ -126,6 +112,7 @@ export default function HomePage() {
 
             <div className="mt-7 max-w-lg">
               <UidForm />
+              <SavedAccounts />
             </div>
 
             <p className="mt-4 text-[11.5px] leading-relaxed text-faint">

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { saveAccount } from "@/lib/accounts";
 import { GAMES } from "@/lib/site";
 import type { Game } from "@/lib/types";
 
@@ -22,6 +23,8 @@ export function UidForm({ initialGame = "zzz" }: { initialGame?: Game }) {
       return;
     }
     setError(null);
+    // Looking a UID up saves it in this browser, so the agent and the home page can reuse it.
+    saveAccount(game, digits);
     setPending(true);
     router.push(`/${game}/${digits}`);
   }

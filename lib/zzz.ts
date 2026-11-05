@@ -456,4 +456,26 @@ export function zzzSuitList(): ZzzSuitOption[] {
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
+export interface ZzzSuitBonus {
+  id: string;
+  name: string;
+  bonus: string[];
+}
+
+/** Disc sets with their bonus lines spelled out, for the build agent's catalog tool. */
+export function zzzSuitBonusList(): ZzzSuitBonus[] {
+  return Object.entries(data.suits)
+    .map(([id, suit]) => {
+      const bonus: string[] = [];
+      for (const [propId, value] of Object.entries(suit.bonus)) {
+        if (!data.stats[propId]) continue;
+        bonus.push(
+          `${isPct(propId) ? `+${fmtPct(value / 100)}` : `+${fmtInt(value)}`} ${zzzPropLabel(propId)}`,
+        );
+      }
+      return { id, name: suit.name, bonus };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export { buildSheet as zzzBuildSheet, buildSets as zzzBuildSets };

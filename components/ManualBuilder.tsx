@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CopyButton } from "./CopyButton";
 import { Stars, StatGrid } from "./ui";
 import { GAMES } from "@/lib/site";
 import { encodeBuild } from "@/lib/manualCodec";
+import { saveManualDraft } from "@/lib/manualDrafts";
 import type { ManualBuild, ManualPiece, ManualStatLine } from "@/lib/manualCodec";
 import type { ManualCatalog, StatOption } from "@/lib/manual";
 import type { Character, Game } from "@/lib/types";
@@ -99,6 +100,9 @@ export function ManualBuilder({
   const [character, setCharacter] = useState<Character | null>(initialCharacter);
   const [filter, setFilter] = useState("");
   const [origin, setOrigin] = useState("");
+  const [savedAt, setSavedAt] = useState(0);
+  // Only autosave once the user actually edits, so opening a shared link stays read-only.
+  const touched = useRef(false);
 
   const encoded = useMemo(() => encodeBuild(build), [build]);
   const optionLabel = useMemo(
@@ -133,12 +137,28 @@ export function ManualBuilder({
     };
   }, [encoded, game]);
 
-  const update = (patch: Partial<ManualBuild>) => setBuild((current) => ({ ...current, ...patch }));
-  const updatePiece = (slot: number, patch: Partial<ManualPiece>) =>
+  const update = (patch: Partial<ManualBuild>) => {
+    touched.current = true;
+    setBuild((current) => ({ ...current, ...patch }));
+  };
+  const updatePiece = (slot: number, patch: Partial<ManualPiece>) => {
+    touched.current = true;
     setBuild((current) => ({
       ...current,
       pieces: current.pieces.map((piece) => (piece.slot === slot ? { ...piece, ...patch } : piece)),
     }));
+  };
+
+  // Keep a copy in this browser so a refresh doesn't lose the build.
+  useEffect(() => {
+    if (!touched.current) return;
+    const timer = setTimeout(() => {
+      const name = catalog.characters.find((entry) => entry.id === build.char)?.name ?? "Manual build";
+      saveManualDraft({ game, charId: build.char, name, build });
+      setSavedAt(Date.now());
+    }, 700);
+    return () => clearTimeout(timer);
+  }, [build, catalog.characters, game]);
 
   const needle = filter.trim().toLowerCase();
   const characters = needle
@@ -517,6 +537,9 @@ export function ManualBuilder({
           >
             Reset
           </button>
+          {savedAt ? (
+            <span className="self-center text-[10.5px] text-[#7cf5d0]">Saved in this browser</span>
+          ) : null}
         </div>
 
         <p className="text-[11px] leading-relaxed text-faint">

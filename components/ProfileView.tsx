@@ -9,6 +9,9 @@ import { TeamBuilder } from "./TeamBuilder";
 import { CopyButton } from "./CopyButton";
 import { GAMES } from "@/lib/site";
 import { fmtInt, relativeTime } from "@/lib/format";
+import { accountId, touchAccount, useAccounts } from "@/lib/accounts";
+import { applyCharacterEdit, type EditMap } from "@/lib/edits";
+import { storeKey, useLocalStore } from "@/lib/storage";
 import type { Character, Game, ShowcaseProfile } from "@/lib/types";
 
 type SortKey = "level" | "rarity" | "name";
@@ -41,21 +44,35 @@ export function ProfileView({
     setOrigin(window.location.origin);
   }, []);
 
+  // Local corrections only ever touch this browser's copy of the card.
+  const [edits] = useLocalStore<EditMap>(storeKey(`edits:${game}:${uid}`), {});
+  const { accounts, save, remove } = useAccounts();
+  const saved = accounts.some((account) => account.id === accountId(game, uid));
+
   const shareBase = `${origin || ""}/${game}/${uid}`;
   const { player, characters } = profile;
   const accent = GAMES[game].accent;
 
+  const display = useMemo(
+    () => characters.map((character) => applyCharacterEdit(character, edits[character.id])),
+    [characters, edits],
+  );
+
+  useEffect(() => {
+    touchAccount(accountId(game, uid), { nickname: player.nickname });
+  }, [game, player.nickname, uid]);
+
   const visible = useMemo(() => {
     const needle = query.trim().toLowerCase();
     const filtered = needle
-      ? characters.filter((character) => character.name.toLowerCase().includes(needle))
-      : characters;
+      ? display.filter((character) => character.name.toLowerCase().includes(needle))
+      : display;
     return [...filtered].sort((a, b) => {
       if (sort === "name") return a.name.localeCompare(b.name);
       if (sort === "rarity") return b.rarity - a.rarity || a.name.localeCompare(b.name);
       return b.level - a.level || b.rarity - a.rarity || a.name.localeCompare(b.name);
     });
-  }, [characters, query, sort]);
+  }, [display, query, sort]);
 
   return (
     <div>
@@ -80,6 +97,15 @@ export function ProfileView({
               New lookup
             </Link>
             <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  saved ? remove(accountId(game, uid)) : save(game, uid, player.nickname)
+                }
+                className={`btn btn-ghost px-3 py-2 text-[12px] ${saved ? "text-[#7cf5d0]" : ""}`}
+              >
+                {saved ? "★ Saved" : "☆ Save account"}
+              </button>
               <CopyButton value={shareBase} label="Copy profile link" />
               <button
                 type="button"
@@ -160,6 +186,16 @@ export function ProfileView({
             ))}
           </div>
 
+          <Link
+            href={`/agent?game=${game}&uid=${uid}`}
+            className="btn btn-ghost px-3 py-1.5 text-[12px]"
+          >
+            Ask the agent
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M7 17L17 7M17 7H8m9 0v9" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </Link>
+
           {tab === "characters" ? (
             <div className="flex items-center gap-2">
               <div className="relative">
@@ -215,7 +251,7 @@ export function ProfileView({
           <TeamBuilder
             game={game}
             uid={uid}
-            characters={characters}
+            characters={display}
             shareBase={shareBase}
             initialTeam={initialTeam}
             initialTitle={initialTitle}
@@ -234,6 +270,7 @@ export function ProfileView({
         game={game}
         uid={uid}
         shareUrl={shareBase}
+        edit={selected ? edits[selected.id] ?? null : null}
         onClose={() => setSelected(null)}
       />
     </div>

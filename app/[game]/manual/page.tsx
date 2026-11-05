@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ManualBuilder } from "@/components/ManualBuilder";
+import { ManualDrafts } from "@/components/ManualDrafts";
+import { SiteNav } from "@/components/SiteNav";
 import { buildManualProfile, manualCatalog, statOptions } from "@/lib/manual";
 import { decodeBuild } from "@/lib/manualCodec";
 import { GAMES, isGame } from "@/lib/site";
@@ -45,22 +47,20 @@ export default async function ManualPage({ params, searchParams }: PageProps) {
       </div>
 
       <div className="shell relative py-7">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Link href="/" className="flex items-center gap-2.5 text-[13px] text-muted transition-colors hover:text-white">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M19 12H5m0 0l6-6m-6 6l6 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Astra
+        <SiteNav>
+          <Link
+            href="/zzz/manual"
+            className={`btn px-2.5 py-1 text-[11px] ${game === "zzz" ? "btn-primary" : "btn-ghost"}`}
+          >
+            ZZZ
           </Link>
-          <div className="flex items-center gap-2 text-[11.5px]">
-            <Link href="/zzz/manual" className={`btn px-3 py-1.5 ${game === "zzz" ? "btn-primary" : "btn-ghost"}`}>
-              ZZZ
-            </Link>
-            <Link href="/hsr/manual" className={`btn px-3 py-1.5 ${game === "hsr" ? "btn-primary" : "btn-ghost"}`}>
-              HSR
-            </Link>
-          </div>
-        </div>
+          <Link
+            href="/hsr/manual"
+            className={`btn px-2.5 py-1 text-[11px] ${game === "hsr" ? "btn-primary" : "btn-ghost"}`}
+          >
+            HSR
+          </Link>
+        </SiteNav>
 
         <div className="mt-6 max-w-2xl">
           <p className="label">{GAMES[game].short} · manual mode</p>
@@ -73,6 +73,8 @@ export default async function ManualPage({ params, searchParams }: PageProps) {
             cards, so the panel updates as you type and the PNG export matches.
           </p>
         </div>
+
+        <ManualDrafts game={game} />
 
         <div className="mt-6">
           <ManualBuilder
