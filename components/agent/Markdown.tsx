@@ -60,6 +60,38 @@ function inline(value: string, prefix: string): React.ReactNode[] {
   return parts;
 }
 
+/** "**Label:** the rest" reads as a scannable row instead of one dim sentence. */
+function Leadin({ value, prefix }: { value: string; prefix: string }) {
+  const match = /^\*\*([^*]{1,40})\*\*[:：]?\s*([\s\S]*)$/.exec(value);
+  if (!match) return <>{inline(value, prefix)}</>;
+  return (
+    <>
+      <span className="text-white/95">{match[1]}</span>
+      {match[2] ? (
+        <span className="text-white/70">
+          {" "}
+          {inline(match[2], prefix)}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
+/** Section labels give a long reply visible bones: accent tick, name, hairline. */
+function SectionLabel({ label, first }: { label: string; first: boolean }) {
+  return (
+    <p
+      className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/45 ${
+        first ? "" : "pt-2.5"
+      }`}
+    >
+      <span className="h-2.5 w-[2px] shrink-0 rounded-full bg-[#7cf5d0]/60" />
+      <span className="shrink-0">{label}</span>
+      <span className="h-px flex-1 bg-white/[0.07]" />
+    </p>
+  );
+}
+
 function Fence({
   info,
   code,
@@ -142,20 +174,36 @@ function parse(text: string, profile: ShowcaseProfile | null): React.ReactNode[]
 
   const flush = () => {
     if (bullets.length) {
+      const key = blocks.length;
       blocks.push(
-        <ul key={`ul-${blocks.length}`} className="ml-4 list-disc space-y-1 text-[12.5px] text-white/80">
+        <ul key={`ul-${key}`} className="space-y-1.5">
           {bullets.map((item, itemIndex) => (
-            <li key={itemIndex}>{inline(item, `b${blocks.length}-${itemIndex}`)}</li>
+            <li
+              key={itemIndex}
+              className="relative pl-3.5 text-[12.5px] leading-relaxed text-white/75"
+            >
+              <span className="absolute left-0 top-[8px] h-[3px] w-[3px] rounded-full bg-white/35" />
+              <Leadin value={item} prefix={`b${key}-${itemIndex}`} />
+            </li>
           ))}
         </ul>,
       );
       bullets = [];
     }
     if (ordered.length) {
+      const key = blocks.length;
       blocks.push(
-        <ol key={`ol-${blocks.length}`} className="ml-4 list-decimal space-y-1 text-[12.5px] text-white/80">
+        <ol key={`ol-${key}`} className="space-y-1.5">
           {ordered.map((item, itemIndex) => (
-            <li key={itemIndex}>{inline(item, `o${blocks.length}-${itemIndex}`)}</li>
+            <li
+              key={itemIndex}
+              className="relative pl-4 text-[12.5px] leading-relaxed text-white/75"
+            >
+              <span className="num absolute left-0 top-[1px] text-[10px] text-[#a98bff]">
+                {itemIndex + 1}
+              </span>
+              <Leadin value={item} prefix={`o${key}-${itemIndex}`} />
+            </li>
           ))}
         </ol>,
       );
@@ -219,12 +267,21 @@ function parse(text: string, profile: ShowcaseProfile | null): React.ReactNode[]
     if (heading) {
       flush();
       blocks.push(
-        <p
+        <SectionLabel
           key={`h-${blocks.length}`}
-          className="pt-1 font-display text-[11.5px] font-semibold uppercase tracking-[0.12em] text-white/70"
-        >
-          {inline(heading[2], `h${blocks.length}`)}
-        </p>,
+          label={heading[2].replace(/\*\*/g, "")}
+          first={blocks.length === 0}
+        />,
+      );
+      continue;
+    }
+
+    // A line that is only a short bold phrase is a section name in disguise.
+    const bare = /^\*\*([^*]{2,48})\*\*[:：]?\s*$/.exec(line.trim());
+    if (bare) {
+      flush();
+      blocks.push(
+        <SectionLabel key={`s-${blocks.length}`} label={bare[1]} first={blocks.length === 0} />,
       );
       continue;
     }
@@ -244,8 +301,16 @@ function parse(text: string, profile: ShowcaseProfile | null): React.ReactNode[]
     }
 
     flush();
+    // The first paragraph is the verdict, so it gets more weight than the body.
     blocks.push(
-      <p key={`p-${blocks.length}`} className="text-[12.5px] leading-relaxed text-white/80">
+      <p
+        key={`p-${blocks.length}`}
+        className={
+          blocks.length === 0
+            ? "text-[13px] leading-relaxed text-white/90"
+            : "text-[12.5px] leading-relaxed text-white/75"
+        }
+      >
         {inline(line, `p${blocks.length}`)}
       </p>,
     );
