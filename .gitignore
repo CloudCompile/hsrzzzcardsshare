@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.vercel
+dev.log
+dev.pid
+.env*.local
+*.tsbuildinfo
+next-env.d.ts
+.DS_Store
+
+# generated locally
+artifacts
+*.log

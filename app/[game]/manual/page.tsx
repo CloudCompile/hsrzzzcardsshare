@@ -1,0 +1,89 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { ManualBuilder } from "@/components/ManualBuilder";
+import { buildManualProfile, manualCatalog, statOptions } from "@/lib/manual";
+import { decodeBuild } from "@/lib/manualCodec";
+import { GAMES, isGame } from "@/lib/site";
+
+export const dynamic = "force-dynamic";
+
+interface PageProps {
+  params: Promise<{ game: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { game } = await params;
+  if (!isGame(game)) return {};
+  const title = `Manual ${GAMES[game].short} card builder`;
+  return {
+    title,
+    description: `Type in your ${GAMES[game].label} gear and stats by hand and get the same shareable card and PNG export, no showcase needed.`,
+  };
+}
+
+export default async function ManualPage({ params, searchParams }: PageProps) {
+  const { game } = await params;
+  const query = await searchParams;
+  if (!isGame(game)) notFound();
+
+  const raw = Array.isArray(query.b) ? query.b[0] : query.b;
+  const catalog = manualCatalog(game);
+  const initialBuild = decodeBuild(raw, {
+    game,
+    char: catalog.characters[0]?.id ?? "",
+    level: catalog.maxLevel,
+  });
+  const profile = buildManualProfile(game, initialBuild);
+
+  return (
+    <main className="relative min-h-screen">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[460px] overflow-hidden">
+        <div className="absolute inset-0 grid-bg" />
+        <div className="absolute left-1/2 top-[-180px] h-[420px] w-[760px] -translate-x-1/2 rounded-full bg-[#a98bff]/[0.09] blur-[110px]" />
+      </div>
+
+      <div className="shell relative py-7">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <Link href="/" className="flex items-center gap-2.5 text-[13px] text-muted transition-colors hover:text-white">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M19 12H5m0 0l6-6m-6 6l6 6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Astra
+          </Link>
+          <div className="flex items-center gap-2 text-[11.5px]">
+            <Link href="/zzz/manual" className={`btn px-3 py-1.5 ${game === "zzz" ? "btn-primary" : "btn-ghost"}`}>
+              ZZZ
+            </Link>
+            <Link href="/hsr/manual" className={`btn px-3 py-1.5 ${game === "hsr" ? "btn-primary" : "btn-ghost"}`}>
+              HSR
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-6 max-w-2xl">
+          <p className="label">{GAMES[game].short} · manual mode</p>
+          <h1 className="mt-2 font-display text-3xl font-semibold leading-tight sm:text-[38px]">
+            Build the card by hand.
+          </h1>
+          <p className="mt-3 text-[13px] leading-relaxed text-muted">
+            No showcase pinned, or working on a build that isn&apos;t in game yet? Enter the character,
+            W-Engine and every disc or relic yourself. Astra runs the same stat maths as the showcase
+            cards, so the panel updates as you type and the PNG export matches.
+          </p>
+        </div>
+
+        <div className="mt-6">
+          <ManualBuilder
+            game={game}
+            initialBuild={initialBuild}
+            catalog={catalog}
+            options={statOptions(game)}
+            initialCharacter={profile?.characters[0] ?? null}
+          />
+        </div>
+      </div>
+    </main>
+  );
+}
