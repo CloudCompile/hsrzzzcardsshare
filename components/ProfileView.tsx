@@ -27,7 +27,11 @@ export function ProfileView({
   initialTitle: string;
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<"characters" | "teams">("characters");
+  // A shared team link carries ?team= / ?title=, so it should open on the team builder rather than
+  // the roster.
+  const [tab, setTab] = useState<"characters" | "teams">(
+    initialTeam.length || initialTitle ? "teams" : "characters",
+  );
   const [selected, setSelected] = useState<Character | null>(null);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("level");
@@ -192,29 +196,30 @@ export function ProfileView({
           ) : null}
         </div>
 
-        <div className="mt-5">
-          {tab === "characters" ? (
-            visible.length ? (
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {visible.map((character) => (
-                  <CharacterCard key={character.id} character={character} onOpen={setSelected} />
-                ))}
-              </div>
-            ) : (
-              <div className="panel px-5 py-10 text-center text-[13px] text-muted">
-                No characters match “{query}”.
-              </div>
-            )
+        {/* Both panes stay mounted so switching tabs keeps a lineup you just picked. */}
+        <div className={tab === "characters" ? "mt-5" : "mt-5 hidden"}>
+          {visible.length ? (
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {visible.map((character) => (
+                <CharacterCard key={character.id} character={character} onOpen={setSelected} />
+              ))}
+            </div>
           ) : (
-            <TeamBuilder
-              game={game}
-              uid={uid}
-              characters={characters}
-              shareBase={shareBase}
-              initialTeam={initialTeam}
-              initialTitle={initialTitle}
-            />
+            <div className="panel px-5 py-10 text-center text-[13px] text-muted">
+              No characters match “{query}”.
+            </div>
           )}
+        </div>
+
+        <div className={tab === "teams" ? "mt-5" : "mt-5 hidden"}>
+          <TeamBuilder
+            game={game}
+            uid={uid}
+            characters={characters}
+            shareBase={shareBase}
+            initialTeam={initialTeam}
+            initialTitle={initialTitle}
+          />
         </div>
 
         <p className="mt-8 text-[11px] leading-relaxed text-faint">

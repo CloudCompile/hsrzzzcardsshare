@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CopyButton } from "./CopyButton";
 import { TeamCard } from "./TeamCard";
 import { TEAM_SIZE } from "@/lib/site";
@@ -43,6 +43,21 @@ export function TeamBuilder({
       ...(title.trim() ? { title: title.trim() } : {}),
       download: "1",
     }).toString();
+
+  // Keep the address bar in step with the lineup, so copying the profile URL shares this team.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (picked.length) params.set("team", picked.join(","));
+    else params.delete("team");
+    if (title.trim()) params.set("title", title.trim());
+    else params.delete("title");
+    const search = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${search ? `?${search}` : ""}`,
+    );
+  }, [picked, title]);
 
   function toggle(id: string) {
     setPicked((current) => {
