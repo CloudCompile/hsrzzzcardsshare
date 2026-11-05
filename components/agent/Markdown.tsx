@@ -2,11 +2,20 @@
 
 import { useMemo } from "react";
 import type { ShowcaseProfile } from "@/lib/types";
-import { BuildArtifact, ChartArtifact, CodeBlock, parseChart } from "./Artifacts";
+import {
+  BuildArtifact,
+  ChartArtifact,
+  CodeBlock,
+  NoteArtifact,
+  parseBuild,
+  parseChart,
+  parseNote,
+} from "./Artifacts";
 
 /**
  * Markdown subset for chat replies: headings, lists, tables, fenced code and
- * Astra's inline blocks (`astra-chart`, `astra-build`). No HTML, no dependencies.
+ * Astra's inline blocks (`astra-chart`, `astra-build`, `astra-note`). No HTML,
+ * no dependencies.
  */
 export function Markdown({ text, profile }: { text: string; profile?: ShowcaseProfile | null }) {
   const blocks = useMemo(() => parse(text, profile ?? null), [text, profile]);
@@ -71,15 +80,14 @@ function Fence({
 
   if (kind === "astra-build" || kind === "build") {
     if (closed) {
-      let query = code.trim();
-      try {
-        const parsed = JSON.parse(code) as { agent?: unknown; name?: unknown };
-        query = String(parsed.agent ?? parsed.name ?? "");
-      } catch {
-        // A bare name on its own line works too.
-      }
-      if (query) return <BuildArtifact query={query} profile={profile} />;
+      const spec = parseBuild(code);
+      if (spec.query) return <BuildArtifact spec={spec} profile={profile} />;
     }
+  }
+
+  if (kind === "astra-note" || kind === "note") {
+    const spec = closed ? parseNote(code) : null;
+    if (spec) return <NoteArtifact spec={spec} />;
   }
 
   return <CodeBlock code={code} language={kind} streaming={!closed} />;
