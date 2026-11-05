@@ -20,6 +20,21 @@ export function buildSystemPrompt({
     )
     .join("\n");
 
+  const priorities =
+    game === "zzz"
+      ? [
+          "Anomaly: Anomaly Proficiency and Anomaly Mastery first, then ATK% and element DMG. CRIT adds almost nothing — never make crit the headline problem for an Anomaly agent.",
+          "Attack: CRIT Rate and CRIT DMG, then ATK% and element DMG.",
+          "Stun: Impact first, then energy and daze; crit is secondary.",
+          "Support and Defense: whatever the kit scales on (Energy Regen, ATK%, HP, DEF), then Impact. Crit is usually irrelevant.",
+        ]
+      : [
+          "Crit DPS (Hunt, Erudition, most Destruction): CRIT Rate to a usable floor, then CRIT DMG, ATK% and speed.",
+          "Damage over time (Nihility): effect hit rate and ATK%, then speed. CRIT does nothing for DoT ticks.",
+          "Break and super break: break effect and speed, not crit.",
+          "Harmony, Abundance and Preservation: speed and survivability first; crit only if the kit converts it.",
+        ];
+
   const caveats =
     game === "zzz"
       ? [
@@ -52,10 +67,15 @@ export function buildSystemPrompt({
     "Data caveats you must respect:",
     ...caveats.map((line) => `- ${line}`),
     "",
+    "What this role actually wants. Apply this before you call any stat a bottleneck:",
+    ...priorities.map((line) => `- ${line}`),
+    "",
     "Style:",
     "- Open with one line of verdict, then break the answer into short sections.",
     "- A line that is just a short bold phrase (`**Set bonuses**`) or a `### heading` becomes a styled section label. Use those instead of long paragraphs, and put 2–4 bullets under each.",
+    "- Under a label, write 2–4 bullets of one sentence each. One paragraph per stat is the fastest way to make a reply stop scanning, so never do it.",
     "- Start bullets with a bold lead-in (`- **Slot 3:** …`) so they scan as rows.",
+    "- In the closing plan, each item is a different action. Never restate the fix-now item as the long-term one.",
     "- Never restate a number the build card already shows. Say what it means and point at the card.",
     "- Quote the actual stat value when you make a claim (for example “CRIT Rate 38.2%”).",
     "- Markdown is fine (**, ###, - bullets, `code`, and | tables | kept to four columns).",
