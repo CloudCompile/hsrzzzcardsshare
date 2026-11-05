@@ -170,37 +170,58 @@ function SetChips({ sets, width }: { sets: SetGroup[]; width: number }) {
   );
 }
 
+const CORE_LETTERS = ["—", "A", "B", "C", "D", "E", "F"];
+
 function CoreRanks({ rank, accent }: { rank: number; accent: string }) {
+  const level = Math.max(0, Math.min(6, rank));
   return (
-    <div style={{ display: "flex", flexDirection: "column", marginTop: 10 }}>
-      <div style={{ display: "flex", fontSize: 11, letterSpacing: 3, color: "#6f6f86", marginBottom: 8 }}>
-        CORE SKILL
-      </div>
-      <div style={{ display: "flex" }}>
-        {["A", "B", "C", "D", "E", "F"].map((letter, index) => {
-          const on = index < rank;
-          return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        width: "100%",
+        marginTop: 12,
+        padding: "10px 14px",
+        borderRadius: 10,
+        background: "rgba(255,255,255,0.03)",
+        border: LINE,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <div style={{ display: "flex", fontSize: 11, letterSpacing: 3, color: "#6f6f86", marginRight: 14 }}>
+          CORE SKILL
+        </div>
+        <div style={{ display: "flex" }}>
+          {[1, 2, 3, 4, 5, 6].map((step) => (
             <div
-              key={letter}
+              key={step}
               style={{
                 display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 34,
-                height: 34,
-                marginRight: 8,
-                borderRadius: 999,
-                border: `1px solid ${on ? accent : "rgba(255,255,255,0.13)"}`,
-                backgroundColor: on ? `${accent}26` : "rgba(255,255,255,0.02)",
-                fontSize: 15,
-                fontWeight: 700,
-                color: on ? "#ffffff" : "#4f4f61",
+                width: 24,
+                height: 6,
+                borderRadius: 3,
+                marginRight: 5,
+                backgroundColor: step <= level ? accent : "rgba(255,255,255,0.12)",
               }}
-            >
-              {letter}
-            </div>
-          );
-        })}
+            />
+          ))}
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 15,
+            fontWeight: 700,
+            color: level ? "#ffffff" : "#5d5d72",
+          }}
+        >
+          {CORE_LETTERS[level]}
+        </div>
+        <div style={{ display: "flex", fontSize: 10.5, letterSpacing: 1.5, color: "#5d5d72", marginLeft: 7 }}>
+          RANK
+        </div>
       </div>
     </div>
   );
@@ -533,7 +554,13 @@ export function portraitCard({
   const columnWidth = Math.floor((contentWidth - 10) / 2);
   const accent = character.accent;
   const isZzz = character.kind === "zzz";
-  const bannerHeight = isZzz ? 344 : 372;
+  // ZZZ roster art is a 1484 x 2048 standing pose, so it gets a full-height
+  // splash column rather than a wide crop that would land on the character's legs.
+  const bannerHeight = isZzz ? 420 : 372;
+  // The splash column is deliberately taller than the banner and clipped at the
+  // knee, so the standing pose reads at a usable size.
+  const zzzArtWidth = 372;
+  const zzzArtHeight = Math.round((zzzArtWidth * 2048) / 1484);
   const stats = character.sheet.slice(0, 11);
   const statColumns = [stats.slice(0, 6), stats.slice(6)];
   const gear = character.gear.slice(0, 6);
@@ -559,29 +586,39 @@ export function portraitCard({
         <div
           style={{ display: "flex", position: "relative", width, height: bannerHeight, overflow: "hidden" }}
         >
-          {isZzz ? (
-            // A tall standing pose loses its face to a wide crop, so ZZZ uses the
-            // square character icon as a medallion instead.
-            character.icon ? (
+          {isZzz && character.portrait ? (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                right: 0,
+                width: zzzArtWidth + 200,
+                height: bannerHeight,
+                display: "flex",
+                justifyContent: "flex-end",
+                background: `linear-gradient(200deg, ${accent}33 0%, transparent 58%)`,
+              }}
+            >
               <div
                 style={{
-                  position: "absolute",
-                  top: 38,
-                  right: 46,
                   display: "flex",
-                  width: 256,
-                  height: 256,
-                  borderRadius: 999,
+                  flexDirection: "column",
+                  width: zzzArtWidth,
+                  height: bannerHeight,
                   overflow: "hidden",
-                  border: `2px solid ${accent}88`,
-                  backgroundColor: "#0b0b12",
+                  paddingTop: 26,
                 }}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={character.icon} width={256} height={256} style={{ objectFit: "cover" }} />
+                <img
+                  src={character.portrait}
+                  width={zzzArtWidth}
+                  height={zzzArtHeight}
+                  style={{ objectFit: "cover" }}
+                />
               </div>
-            ) : null
-          ) : character.portrait ? (
+            </div>
+          ) : !isZzz && character.portrait ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={character.portrait}
@@ -613,6 +650,19 @@ export function portraitCard({
                 "linear-gradient(180deg, rgba(7,7,12,0.55) 0%, rgba(7,7,12,0.05) 30%, rgba(7,7,12,0.72) 72%, rgba(7,7,12,0.98) 100%)",
             }}
           />
+          {isZzz ? (
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width,
+                height: bannerHeight,
+                display: "flex",
+                background: `linear-gradient(to right, ${BG} 0%, rgba(7,7,12,0.88) 30%, rgba(7,7,12,0) 66%)`,
+              }}
+            />
+          ) : null}
 
           <div style={{ position: "absolute", top: 24, left: pad, display: "flex", alignItems: "center" }}>
             <div
@@ -623,12 +673,15 @@ export function portraitCard({
           <div
             style={{
               position: "absolute",
-              top: 22,
+              top: 20,
               right: pad,
               display: "flex",
               fontSize: 11,
               letterSpacing: 2,
-              color: "#8f8fa6",
+              color: "#c9c9d8",
+              padding: "5px 9px",
+              borderRadius: 6,
+              backgroundColor: "rgba(7,7,12,0.62)",
             }}
           >
             {`${GAMES[game].short} · ${
