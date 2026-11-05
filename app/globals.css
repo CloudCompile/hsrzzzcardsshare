@@ -50,11 +50,28 @@
 }
 
 @layer components {
+  /* Wide screens get a wider column instead of 180px of empty gutter each side. */
   .shell {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1240px;
     margin-inline: auto;
     padding-inline: 1.25rem;
+  }
+  @media (min-width: 768px) {
+    .shell {
+      padding-inline: 1.75rem;
+    }
+  }
+  @media (min-width: 1440px) {
+    .shell {
+      max-width: 1380px;
+      padding-inline: 2rem;
+    }
+  }
+  @media (min-width: 1680px) {
+    .shell {
+      max-width: 1520px;
+    }
   }
 
   .panel {

@@ -100,18 +100,21 @@ export function UidForm({ initialGame = "zzz" }: { initialGame?: Game }) {
             <span>
               {active.uidLength} · showcase must be public in-game
             </span>
-            <span className="text-white/10">|</span>
-            <span>Try an example:</span>
-            <button
-              type="button"
-              className="num underline decoration-white/20 underline-offset-2 transition-colors hover:text-white"
-              onClick={() => {
-                setUid(active.example);
-                setError(null);
-              }}
-            >
-              {active.example}
-            </button>
+            <span className="hidden text-white/10 sm:inline">|</span>
+            {/* Kept together so the sample UID never wraps apart from its label. */}
+            <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+              <span>Try an example:</span>
+              <button
+                type="button"
+                className="num underline decoration-white/20 underline-offset-2 transition-colors hover:text-white"
+                onClick={() => {
+                  setUid(active.example);
+                  setError(null);
+                }}
+              >
+                {active.example}
+              </button>
+            </span>
           </>
         )}
       </div>

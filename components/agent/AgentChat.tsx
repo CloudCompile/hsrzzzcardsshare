@@ -137,7 +137,7 @@ export function AgentChat({
     <div className="flex min-h-0 flex-1 flex-col">
       {messages.length ? (
         <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[760px] space-y-6 px-5 py-7">
+          <div className="mx-auto w-full max-w-[860px] space-y-6 px-5 py-7">
             {messages.map((message) =>
               message.role === "user" ? (
                 <div key={message.id} className="flex justify-end">
@@ -231,7 +231,7 @@ export function AgentChat({
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto flex min-h-full w-full max-w-[760px] flex-col justify-center px-5 py-10">
+          <div className="mx-auto flex min-h-full w-full max-w-[860px] flex-col justify-center px-5 py-10">
             <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-white/12 bg-black/60">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                 <path
@@ -285,7 +285,7 @@ export function AgentChat({
       )}
 
       <div className="shrink-0 border-t border-white/[0.06] bg-[#05050a]/85 backdrop-blur">
-        <div className="mx-auto w-full max-w-[760px] px-5 pb-4 pt-3">
+        <div className="mx-auto w-full max-w-[860px] px-5 pb-4 pt-3">
           <div className="relative">
             {suggestions.length ? (
               <div className="absolute bottom-full left-2 mb-1.5 w-60 overflow-hidden rounded-xl border border-white/10 bg-[#0b0b13] shadow-2xl">

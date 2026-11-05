@@ -96,28 +96,36 @@ export function ProfileView({
               </svg>
               New lookup
             </Link>
-            <div className="flex flex-wrap items-center gap-2">
+            {/* Two even rows on a phone; the primary download spans the full width. */}
+            <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:w-auto sm:flex-wrap sm:items-center">
               <button
                 type="button"
                 onClick={() =>
                   saved ? remove(accountId(game, uid)) : save(game, uid, player.nickname)
                 }
-                className={`btn btn-ghost px-3 py-2 text-[12px] ${saved ? "text-[#7cf5d0]" : ""}`}
+                className={`btn btn-ghost px-3 py-2.5 text-[12px] sm:py-2 ${saved ? "text-[#7cf5d0]" : ""}`}
               >
                 {saved ? "★ Saved" : "☆ Save account"}
               </button>
-              <CopyButton value={shareBase} label="Copy profile link" />
+              <CopyButton
+                value={shareBase}
+                label="Copy profile link"
+                className="btn btn-ghost px-3 py-2.5 text-[12px] sm:py-2"
+              />
               <button
                 type="button"
                 onClick={() => router.refresh()}
-                className="btn btn-ghost px-3 py-2 text-[12px]"
+                className="btn btn-ghost px-3 py-2.5 text-[12px] sm:py-2"
               >
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
                 Refresh
               </button>
-              <a href={`/api/card/${game}/${uid}?download=1`} className="btn btn-primary px-3 py-2 text-[12px]">
+              <a
+                href={`/api/card/${game}/${uid}?download=1`}
+                className="btn btn-primary px-3 py-2.5 text-[12px] sm:py-2"
+              >
                 Download PNG
               </a>
             </div>
@@ -197,13 +205,13 @@ export function ProfileView({
           </Link>
 
           {tab === "characters" ? (
-            <div className="flex items-center gap-2">
-              <div className="relative">
+            <div className="flex w-full items-center gap-2 sm:w-auto">
+              <div className="relative flex-1 sm:flex-none">
                 <input
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder="Search…"
-                  className="w-36 rounded-md border border-white/10 bg-black/40 py-1.5 pl-7 pr-2 text-[12px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-white/25 sm:w-44"
+                  className="w-full rounded-md border border-white/10 bg-black/40 py-1.5 pl-7 pr-2 text-[12px] text-white outline-none transition-colors placeholder:text-white/25 focus:border-white/25 sm:w-44"
                 />
                 <svg
                   className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-white/30"
@@ -222,7 +230,7 @@ export function ProfileView({
                 value={sort}
                 onChange={(event) => setSort(event.target.value as SortKey)}
                 aria-label="Sort characters"
-                className="rounded-md border border-white/10 bg-black/40 px-2 py-1.5 text-[12px] text-white/80 outline-none focus:border-white/25"
+                className="shrink-0 rounded-md border border-white/10 bg-black/40 px-2 py-1.5 text-[12px] text-white/80 outline-none focus:border-white/25"
               >
                 <option value="level">Level</option>
                 <option value="rarity">Rarity</option>
@@ -235,7 +243,7 @@ export function ProfileView({
         {/* Both panes stay mounted so switching tabs keeps a lineup you just picked. */}
         <div className={tab === "characters" ? "mt-5" : "mt-5 hidden"}>
           {visible.length ? (
-            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {visible.map((character) => (
                 <CharacterCard key={character.id} character={character} onOpen={setSelected} />
               ))}

@@ -92,20 +92,20 @@ export default function HomePage() {
       </header>
 
       <section className="relative">
-        <div className="shell grid items-center gap-12 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:py-16">
+        <div className="shell grid items-center gap-12 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-16 lg:py-20 xl:py-24">
           <div id="lookup" className="animate-fade-up scroll-mt-24">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1.5 text-[10.5px] uppercase tracking-[0.16em] text-muted">
               <span className="h-1.5 w-1.5 rounded-full bg-[#7cf5d0]" />
               Zenless Zone Zero · Honkai: Star Rail
             </p>
-            <h1 className="font-display text-[42px] font-bold leading-[0.95] tracking-tight sm:text-[62px]">
+            <h1 className="font-display text-[42px] font-bold leading-[0.95] tracking-tight sm:text-[62px] xl:text-[74px]">
               Your account,
               <br />
               <span className="bg-gradient-to-r from-[#7cf5d0] via-[#b8f3ff] to-[#a98bff] bg-clip-text text-transparent">
                 carded.
               </span>
             </h1>
-            <p className="mt-5 max-w-md text-[14px] leading-relaxed text-muted">
+            <p className="mt-5 max-w-md text-[14px] leading-relaxed text-muted lg:max-w-lg">
               Paste your UID and Astra turns your public showcase into detailed, shareable cards —
               full stat sheets, gear breakdowns and team build cards. No login, no install.
             </p>
@@ -155,8 +155,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="relative hidden h-[420px] lg:block">
-            <div className="absolute left-6 top-4 w-[300px] rotate-[-6deg]">
+          <div className="relative hidden h-[420px] lg:block xl:h-[480px]">
+            <div className="absolute left-6 top-4 w-[300px] rotate-[-6deg] xl:left-2 xl:w-[340px]">
               <div className="animate-float rounded-2xl border border-white/[0.08] bg-[#0a0a12] p-3 opacity-80">
                 <div className="flex items-center gap-2">
                   <div className="h-9 w-9 overflow-hidden rounded-lg border border-white/10 bg-black/50">
@@ -183,7 +183,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="absolute right-0 top-14 w-[320px] rotate-[4deg]">
+            <div className="absolute right-0 top-14 w-[320px] rotate-[4deg] xl:top-10 xl:w-[370px]">
               <div className="relative overflow-hidden rounded-2xl border border-white/[0.1] bg-[#08080f] p-3 shadow-[0_40px_100px_-40px_rgba(124,245,208,0.35)]">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_100%_0%,rgba(247,216,74,0.18),transparent_60%)]" />
                 <div className="relative flex items-center gap-2.5">
@@ -232,7 +232,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="absolute bottom-2 left-1/2 w-[240px] -translate-x-1/2 rotate-[2deg]">
+            <div className="absolute bottom-2 left-1/2 w-[240px] -translate-x-1/2 rotate-[2deg] xl:bottom-0 xl:w-[280px]">
               <div className="rounded-xl border border-white/[0.08] bg-[#0b0b14]/90 p-2.5 backdrop-blur">
                 <p className="label">Team build</p>
                 <div className="mt-1.5 flex gap-1.5">
@@ -250,18 +250,20 @@ export default function HomePage() {
       </section>
 
       <section className="relative border-y border-white/[0.06] bg-white/[0.012]">
-        <div className="shell grid gap-6 py-8 sm:grid-cols-3">
+        <div className="shell grid gap-6 py-9 sm:grid-cols-3 lg:gap-10 lg:py-12">
           {features.map((feature) => (
             <div key={feature.title}>
               <h3 className="font-display text-[15px] font-semibold text-white">{feature.title}</h3>
-              <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted">{feature.body}</p>
+              <p className="mt-1.5 text-[12.5px] leading-relaxed text-muted lg:text-[13px]">
+                {feature.body}
+              </p>
             </div>
           ))}
         </div>
       </section>
 
       <section id="how" className="relative scroll-mt-20">
-        <div className="shell py-14">
+        <div className="shell py-14 lg:py-20">
           <div className="flex items-end justify-between gap-4">
             <div>
               <p className="label">How it works</p>
@@ -277,7 +279,7 @@ export default function HomePage() {
 
           <div className="mt-7 grid gap-4 sm:grid-cols-3">
             {steps.map((step, index) => (
-              <div key={step.title} className="panel relative overflow-hidden p-5">
+              <div key={step.title} className="panel relative overflow-hidden p-5 lg:p-6">
                 <span className="num absolute right-3 top-2 text-[42px] font-bold leading-none text-white/[0.05]">
                   0{index + 1}
                 </span>
@@ -290,7 +292,7 @@ export default function HomePage() {
       </section>
 
       <section id="faq" className="relative scroll-mt-20 border-t border-white/[0.06]">
-        <div className="shell grid gap-8 py-14 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
+        <div className="shell grid gap-8 py-14 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:gap-14 lg:py-20">
           <div>
             <p className="label">FAQ</p>
             <h2 className="mt-2 font-display text-2xl font-semibold sm:text-3xl">Good questions</h2>
