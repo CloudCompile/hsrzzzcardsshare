@@ -32,7 +32,7 @@ const TONES: Record<ChartTone, string> = {
   good: "linear-gradient(90deg, #4fdcb4, #7cf5d0)",
   warn: "linear-gradient(90deg, #d99a2b, #f7d84a)",
   bad: "linear-gradient(90deg, #cf4f4a, #f77a6a)",
-  muted: "linear-gradient(90deg, #3f3f4c, #6a6a7c)",
+  muted: "linear-gradient(90deg, #56688f, #8497c2)",
 };
 
 const TONE_KEYS = Object.keys(TONES) as ChartTone[];
@@ -154,7 +154,7 @@ export function ChartArtifact({ spec }: { spec: ChartSpec }) {
             return (
               <div key={`${bar.label}-${index}`} className="flex min-w-0 flex-1 flex-col items-center gap-1">
                 <span className="num text-[10px] text-white/80">{formatValue(bar.value, spec)}</span>
-                <span className="relative h-16 w-full rounded-[3px] bg-white/[0.06]">
+                <span className="relative h-16 w-full rounded-[3px] bg-white/[0.045]">
                   <span
                     className="absolute inset-x-0 bottom-0 rounded-[3px]"
                     style={{ height: `${height}%`, background: TONES[barTone(spec, bar)] }}
@@ -310,7 +310,14 @@ export function BuildArtifact({
   const role = character.kind === "zzz"
     ? `${character.profession} · Core ${character.coreRank}`
     : `${character.pathName} · E${character.eidolon}`;
-  const stats = character.sheet.slice(0, spec.compact ? 4 : 6);
+  // A highlighted stat must stay on the card even when compact trims the grid.
+  const ordered = spec.highlight.length
+    ? [
+        ...character.sheet.filter((row) => spec.highlight.includes(row.label.toLowerCase())),
+        ...character.sheet.filter((row) => !spec.highlight.includes(row.label.toLowerCase())),
+      ]
+    : character.sheet;
+  const stats = ordered.slice(0, spec.compact ? 4 : 6);
   const mains = spec.compact ? [] : character.gear.slice(0, 6);
   const show = (section: BuildSection) => spec.sections.includes(section);
 
