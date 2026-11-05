@@ -11,53 +11,16 @@ import {
   parseChart,
   parseNote,
 } from "./Artifacts";
+import { inline } from "./RichText";
 
 /**
- * Markdown subset for chat replies: headings, lists, tables, fenced code and
- * Astra's inline blocks (`astra-chart`, `astra-build`, `astra-note`). No HTML,
- * no dependencies.
+ * Markdown subset for chat replies: headings, lists, tables, fenced code,
+ * Astra's inline blocks (`astra-chart`, `astra-build`, `astra-note`) and the
+ * safe inline HTML subset handled by RichText.
  */
 export function Markdown({ text, profile }: { text: string; profile?: ShowcaseProfile | null }) {
   const blocks = useMemo(() => parse(text, profile ?? null), [text, profile]);
   return <div className="space-y-2.5">{blocks}</div>;
-}
-
-function inline(value: string, prefix: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = [];
-  const pattern = /(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g;
-  let last = 0;
-  let match: RegExpExecArray | null = null;
-  let index = 0;
-
-  while ((match = pattern.exec(value))) {
-    if (match.index > last) parts.push(value.slice(last, match.index));
-    const token = match[0];
-    const key = `${prefix}-${index}`;
-    if (token.startsWith("**")) {
-      parts.push(
-        <strong key={key} className="font-semibold text-white">
-          {token.slice(2, -2)}
-        </strong>,
-      );
-    } else if (token.startsWith("`")) {
-      parts.push(
-        <code key={key} className="num rounded bg-white/10 px-1 py-0.5 text-[11.5px] text-white/90">
-          {token.slice(1, -1)}
-        </code>,
-      );
-    } else {
-      parts.push(
-        <em key={key} className="text-white/80">
-          {token.slice(1, -1)}
-        </em>,
-      );
-    }
-    last = match.index + token.length;
-    index += 1;
-  }
-
-  if (last < value.length) parts.push(value.slice(last));
-  return parts;
 }
 
 /** "**Label:** the rest" reads as a scannable row instead of one dim sentence. */

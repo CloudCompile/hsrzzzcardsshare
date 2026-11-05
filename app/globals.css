@@ -218,3 +218,112 @@
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.95);
 }
+
+/* Inline motion the agent can reach for inside a reply. Deliberately small:
+   one phrase at a time reads as emphasis, a whole paragraph reads as a gif. */
+@keyframes rich-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.rich-shimmer {
+  background-image: linear-gradient(90deg, #7cf5d0, #a98bff, #f7d84a, #7cf5d0);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: rich-shimmer 3.6s linear infinite;
+}
+
+@keyframes rich-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 8px rgba(124, 245, 208, 0.25);
+  }
+  50% {
+    text-shadow: 0 0 18px rgba(124, 245, 208, 0.65);
+  }
+}
+.rich-glow {
+  animation: rich-glow 2.6s ease-in-out infinite;
+}
+
+@keyframes rich-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.rich-pulse {
+  animation: rich-pulse 2s ease-in-out infinite;
+}
+
+@keyframes rich-wave {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-2.5px);
+  }
+}
+.rich-wave-char {
+  display: inline-block;
+  animation: rich-wave 1.4s ease-in-out infinite;
+}
+
+@keyframes rich-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 0.88;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  54% {
+    opacity: 0.92;
+  }
+}
+.rich-flicker {
+  animation: rich-flicker 3.2s steps(1, end) infinite;
+}
+
+@keyframes rich-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rich-rise {
+  animation: rich-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rich-shimmer,
+  .rich-glow,
+  .rich-pulse,
+  .rich-wave-char,
+  .rich-flicker,
+  .rich-rise {
+    animation: none !important;
+  }
+  .rich-shimmer {
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+    color: inherit;
+  }
+}

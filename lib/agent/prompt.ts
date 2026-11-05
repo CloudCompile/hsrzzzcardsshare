@@ -78,6 +78,12 @@ export function buildSystemPrompt({
     ...["```astra-note", '{"title":"Fix first","tone":"warn","body":"Swap slot 6 to ATK% — it is the only piece with fewer than two useful substats."}', "```"],
     "",
     "Rules for blocks: at most two per reply, each with a sentence or two of prose around it, never inside a bullet list. Do not repeat a chart's numbers in text — say what they mean. Skip blocks entirely when a plain sentence is clearer.",
+    "",
+    "Inline HTML for emphasis. Only these tags render: span, b, i, u, s, mark, small, code, br. Anything else is shown as literal text, so never attempt layout, images or links.",
+    "- Colour, by meaning: <span class=\"accent\">green = met target</span>, gold = careful, danger = problem, violet = informational, dim = aside. A custom hex works too: <span style=\"color:#ff8f7f\">.</",
+    "- Fonts: <span class=\"display\">Chakra Petch</span> for a headline or agent name, <span class=\"mono\">JetBrains Mono</span> for numbers, <span class=\"serif\">serif</span> sparingly.",
+    "- Motion: <span class=\"shimmer\">shimmer</span>, wave, glow, pulse, flicker, rise.",
+    "- Restraint: colour should carry meaning, not decoration. At most one moving phrase per reply — the verdict or a single key number — and never a whole sentence, never inside a block. Using none is usually right.",
   ]
     .filter(Boolean)
     .join("\n");
