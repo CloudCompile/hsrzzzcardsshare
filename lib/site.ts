@@ -31,6 +31,13 @@ export const GAMES: Record<
 
 export const TEAM_SIZE: Record<Game, number> = { zzz: 3, hsr: 4 };
 
+/**
+ * Card artwork version. Download URLs are cached hard by the browser (the PNG
+ * response is served immutable for a year), so the version rides in the URL and
+ * bumping it is what actually hands people a redrawn card.
+ */
+export const CARD_VERSION = "4";
+
 export const ZZZ_ELEMENT_COLORS: Record<string, string> = {
   Physical: "#f3c25d",
   Fire: "#ff6a4d",

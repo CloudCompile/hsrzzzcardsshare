@@ -5,6 +5,7 @@ import { CharacterCorrections } from "./CharacterCorrections";
 import { Stars, StatGrid } from "./ui";
 import { CopyButton } from "./CopyButton";
 import { fmtInt } from "@/lib/format";
+import { CARD_VERSION } from "@/lib/site";
 import { editParam, type CharacterEdit } from "@/lib/edits";
 import type { Character, Game } from "@/lib/types";
 
@@ -43,9 +44,9 @@ export function CharacterSheet({
   // Corrections ride along with the download only, never with the share URL.
   const corrections = editParam(edit);
   const suffix = corrections ? `&e=${corrections}` : "";
-  const png = `/api/card/${game}/${uid}?agent=${character.id}&download=1${suffix}`;
-  const detailPng = `/api/card/${game}/${uid}?agent=${character.id}&view=detail&download=1${suffix}`;
-  const portraitPng = `/api/card/${game}/${uid}?agent=${character.id}&view=portrait&download=1${suffix}`;
+  const png = `/api/card/${game}/${uid}?agent=${character.id}&download=1${suffix}&v=${CARD_VERSION}`;
+  const detailPng = `/api/card/${game}/${uid}?agent=${character.id}&view=detail&download=1${suffix}&v=${CARD_VERSION}`;
+  const portraitPng = `/api/card/${game}/${uid}?agent=${character.id}&view=portrait&download=1${suffix}&v=${CARD_VERSION}`;
   const characterShare = `${shareUrl.split("?")[0]}?agent=${character.id}`;
 
   return (

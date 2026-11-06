@@ -7,7 +7,7 @@ import { CharacterCard } from "./CharacterCard";
 import { CharacterSheet } from "./CharacterSheet";
 import { TeamBuilder } from "./TeamBuilder";
 import { CopyButton } from "./CopyButton";
-import { GAMES } from "@/lib/site";
+import { CARD_VERSION, GAMES } from "@/lib/site";
 import { fmtInt, relativeTime } from "@/lib/format";
 import { accountId, touchAccount, useAccounts } from "@/lib/accounts";
 import { applyCharacterEdit, type EditMap } from "@/lib/edits";
@@ -123,7 +123,7 @@ export function ProfileView({
                 Refresh
               </button>
               <a
-                href={`/api/card/${game}/${uid}?download=1`}
+                href={`/api/card/${game}/${uid}?download=1&v=${CARD_VERSION}`}
                 className="btn btn-primary px-3 py-2.5 text-[12px] sm:py-2"
               >
                 Download PNG

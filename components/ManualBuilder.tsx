@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CopyButton } from "./CopyButton";
 import { Stars, StatGrid } from "./ui";
-import { GAMES } from "@/lib/site";
+import { CARD_VERSION, GAMES } from "@/lib/site";
 import { encodeBuild } from "@/lib/manualCodec";
 import { saveManualDraft } from "@/lib/manualDrafts";
 import type { ManualBuild, ManualPiece, ManualStatLine } from "@/lib/manualCodec";
@@ -165,9 +165,9 @@ export function ManualBuilder({
     ? catalog.characters.filter((entry) => entry.name.toLowerCase().includes(needle))
     : catalog.characters;
   const shareUrl = `${origin}/${game}/manual?b=${encoded}`;
-  const pngUrl = `/api/card/${game}/manual?b=${encoded}&download=1`;
-  const sheetUrl = `/api/card/${game}/manual?b=${encoded}&view=detail&download=1`;
-  const portraitUrl = `/api/card/${game}/manual?b=${encoded}&view=portrait&download=1`;
+  const pngUrl = `/api/card/${game}/manual?b=${encoded}&download=1&v=${CARD_VERSION}`;
+  const sheetUrl = `/api/card/${game}/manual?b=${encoded}&view=detail&download=1&v=${CARD_VERSION}`;
+  const portraitUrl = `/api/card/${game}/manual?b=${encoded}&view=portrait&download=1&v=${CARD_VERSION}`;
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">

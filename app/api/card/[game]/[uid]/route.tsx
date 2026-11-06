@@ -90,6 +90,7 @@ export async function GET(
         "content-disposition",
         `attachment; filename="astra-${game}-manual-${slug}${suffix}.png"`,
       );
+      card.headers.set("cache-control", "no-store, max-age=0");
     } else {
       card.headers.set("cache-control", "public, max-age=0, s-maxage=60");
     }
@@ -142,6 +143,9 @@ export async function GET(
 
   if (download) {
     response.headers.set("content-disposition", `attachment; filename="${filename}"`);
+    // Without this the platform serves the PNG immutable for a year, so a redrawn
+    // card keeps coming back as the old image long after a deploy.
+    response.headers.set("cache-control", "no-store, max-age=0");
   } else {
     response.headers.set("cache-control", "public, max-age=0, s-maxage=180, stale-while-revalidate=600");
   }

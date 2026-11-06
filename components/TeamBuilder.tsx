@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CopyButton } from "./CopyButton";
 import { TeamCard } from "./TeamCard";
-import { TEAM_SIZE } from "@/lib/site";
+import { CARD_VERSION, TEAM_SIZE } from "@/lib/site";
 import type { Character, Game } from "@/lib/types";
 
 export function TeamBuilder({
@@ -42,6 +42,7 @@ export function TeamBuilder({
       ...(picked.length ? { team: picked.join(",") } : {}),
       ...(title.trim() ? { title: title.trim() } : {}),
       download: "1",
+      v: CARD_VERSION,
     }).toString();
 
   // Keep the address bar in step with the lineup, so copying the profile URL shares this team.
