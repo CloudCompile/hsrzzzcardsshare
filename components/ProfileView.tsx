@@ -8,6 +8,7 @@ import { DownloadAll } from "./DownloadAll";
 import { CharacterSheet } from "./CharacterSheet";
 import { TeamBuilder } from "./TeamBuilder";
 import { CopyButton } from "./CopyButton";
+import { ShareButton } from "./ShareButton";
 import { CARD_VERSION, GAMES } from "@/lib/site";
 import { fmtInt, relativeTime } from "@/lib/format";
 import { accountId, touchAccount, useAccounts } from "@/lib/accounts";
@@ -111,6 +112,17 @@ export function ProfileView({
               <CopyButton
                 value={shareBase}
                 label="Copy profile link"
+                className="btn btn-ghost px-3 py-2.5 text-[12px] sm:py-2"
+              />
+              <ShareButton
+                url={shareBase}
+                title={`${player.nickname} · ${GAMES[game].short} showcase`}
+                text={`${player.nickname}'s ${GAMES[game].label} showcase on Astra`}
+                file={{
+                  href: `/api/card/${game}/${uid}?v=${CARD_VERSION}`,
+                  filename: `astra-${game}-${uid}.png`,
+                }}
+                label="Share"
                 className="btn btn-ghost px-3 py-2.5 text-[12px] sm:py-2"
               />
               <button

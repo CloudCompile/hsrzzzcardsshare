@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Chakra_Petch, Inter, JetBrains_Mono } from "next/font/google";
 import { SiteBackdrop } from "@/components/SiteBackdrop";
 import { SiteFooter } from "@/components/SiteFooter";
+import { ogImage, siteOrigin } from "@/lib/meta";
 import "./globals.css";
 
 const chakra = Chakra_Petch({
@@ -23,13 +24,13 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ??
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000");
+const siteUrl = siteOrigin();
+
+// One generated image for every link that has no card of its own.
+const homeImage = ogImage({
+  title: "Your account, carded.",
+  sub: "Paste a UID. Get shareable ZZZ and HSR character sheets, team cards and PNG exports.",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -45,8 +46,18 @@ export const metadata: Metadata = {
       "Full character sheets and team build cards from your UID. Share a link or download a PNG.",
     type: "website",
     siteName: "Astra",
+    locale: "en_US",
+    url: "/",
+    images: [homeImage],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    title: "Astra — ZZZ & HSR showcase cards",
+    description:
+      "Full character sheets and team build cards from your UID. Share a link or download a PNG.",
+    images: [homeImage.url],
+  },
+  robots: { index: true, follow: true },
   icons: {
     icon: [
       {

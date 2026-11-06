@@ -2,8 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CopyButton } from "./CopyButton";
+import { ShareButton } from "./ShareButton";
 import { TeamCard } from "./TeamCard";
-import { CARD_VERSION, TEAM_SIZE } from "@/lib/site";
+import { CARD_VERSION, GAMES, TEAM_SIZE } from "@/lib/site";
 import type { Character, Game } from "@/lib/types";
 
 export function TeamBuilder({
@@ -44,6 +45,12 @@ export function TeamBuilder({
       download: "1",
       v: CARD_VERSION,
     }).toString();
+  // The same card without the download flag, so the share sheet can attach the PNG itself.
+  const sharePng = `/api/card/${game}/${uid}?${new URLSearchParams({
+    ...(picked.length ? { team: picked.join(",") } : {}),
+    ...(title.trim() ? { title: title.trim() } : {}),
+    v: CARD_VERSION,
+  }).toString()}`;
 
   // Keep the address bar in step with the lineup, so copying the profile URL shares this team.
   // A profile visit with no lineup built yet leaves the clean URL alone: this pane stays mounted
@@ -144,6 +151,12 @@ export function TeamBuilder({
             Download team card
           </a>
           <CopyButton value={shareUrl} label="Copy team link" />
+          <ShareButton
+            url={shareUrl}
+            title={`${title.trim() || "Team build"} · ${GAMES[game].short}`}
+            text={`A ${GAMES[game].label} team build from my showcase`}
+            file={{ href: sharePng, filename: `astra-${game}-${uid}-team.png` }}
+          />
         </div>
         <p className="text-[11px] leading-relaxed text-faint">
           Team cards use only the characters in your in-game showcase. Share the link and it rebuilds

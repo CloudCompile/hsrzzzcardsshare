@@ -1,12 +1,28 @@
 import type { Metadata } from "next";
 import { AgentWorkspace } from "@/components/agent/AgentWorkspace";
 import { SiteNav } from "@/components/SiteNav";
+import { ogImage } from "@/lib/meta";
 import { isGame } from "@/lib/site";
+
+const description =
+  "Point Astra's build agent at your own OpenAI-compatible model and ask it what to fix on your ZZZ or HSR showcase. Your key stays in your browser.";
 
 export const metadata: Metadata = {
   title: "Build agent",
-  description:
-    "Point Astra's build agent at your own OpenAI-compatible model and ask it what to fix on your ZZZ or HSR showcase. Your key stays in your browser.",
+  description,
+  alternates: { canonical: "/agent" },
+  openGraph: {
+    title: "Build agent",
+    description,
+    url: "/agent",
+    images: [ogImage({ title: "Ask your model about your build.", sub: description })],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Build agent",
+    description,
+    images: [ogImage({ title: "Ask your model about your build.", sub: description }).url],
+  },
 };
 
 interface PageProps {

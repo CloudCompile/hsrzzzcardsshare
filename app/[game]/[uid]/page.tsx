@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProfileView } from "@/components/ProfileView";
 import { ERROR_COPY, errorFromUnknown, getShowcase, normalizeUid } from "@/lib/enka";
+import { cardImage } from "@/lib/meta";
 import { GAMES, isGame } from "@/lib/site";
 
 export const revalidate = 180;
@@ -17,35 +18,61 @@ function first(value: string | string[] | undefined): string {
   return value ?? "";
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { game, uid } = await params;
+  const query = await searchParams;
   if (!isGame(game)) return {};
   const normalized = normalizeUid(uid);
   if (!normalized) return {};
 
+  // A character or team link should preview that card, not the profile it was built from.
+  const card = new URLSearchParams();
+  const agentId = first(query.agent);
+  const team = first(query.team);
+  const teamTitle = first(query.title);
+  if (agentId) card.set("agent", agentId);
+  else if (team) {
+    card.set("team", team);
+    if (teamTitle) card.set("title", teamTitle);
+  }
+  const cardQuery = card.toString();
+  const cardPath = `/api/card/${game}/${normalized}${cardQuery ? `?${cardQuery}` : ""}`;
+  const canonical = `/${game}/${normalized}${cardQuery ? `?${cardQuery}` : ""}`;
+
   try {
     const profile = await getShowcase(game, normalized);
-    const top = profile.characters
-      .slice(0, 4)
-      .map((character) => character.name)
-      .join(", ");
-    const title = `${profile.player.nickname} · ${GAMES[game].short} showcase`;
-    const description = `${profile.characters.length} ${
-      game === "zzz" ? "agents" : "characters"
-    } on showcase${top ? ` — ${top}` : ""}. Stats, gear and team cards.`;
+    const focused = agentId
+      ? profile.characters.find((character) => character.id === agentId)
+      : null;
+    const top = profile.characters.slice(0, 4).map((character) => character.name).join(", ");
+    const title = focused
+      ? `${focused.name} · ${profile.player.nickname}`
+      : `${profile.player.nickname} · ${GAMES[game].short} showcase`;
+    const description = focused
+      ? `Lv.${focused.level} ${focused.name} from ${profile.player.nickname}'s ${GAMES[game].label} showcase — stats, gear and a PNG export.`
+      : team
+        ? `A ${GAMES[game].short} team build from ${profile.player.nickname}${
+            teamTitle ? ` — ${teamTitle}` : ""
+          }.`
+        : `${profile.characters.length} ${
+            game === "zzz" ? "agents" : "characters"
+          } on showcase${top ? ` — ${top}` : ""}. Stats, gear and team cards.`;
     return {
       title,
       description,
+      alternates: { canonical },
       openGraph: {
         title,
         description,
-        images: [{ url: `/api/card/${game}/${normalized}`, width: 1200, height: 630 }],
+        url: canonical,
+        type: "website",
+        images: [cardImage(cardPath, title)],
       },
       twitter: {
         card: "summary_large_image",
         title,
         description,
-        images: [`/api/card/${game}/${normalized}`],
+        images: [cardPath],
       },
     };
   } catch {

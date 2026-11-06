@@ -6,6 +6,7 @@ import { ManualDrafts } from "@/components/ManualDrafts";
 import { SiteNav } from "@/components/SiteNav";
 import { buildManualProfile, manualCatalog, statOptions } from "@/lib/manual";
 import { decodeBuild } from "@/lib/manualCodec";
+import { ogImage } from "@/lib/meta";
 import { GAMES, isGame } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -15,13 +16,42 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: PageProps): Promise<Metadata> {
   const { game } = await params;
   if (!isGame(game)) return {};
-  const title = `Manual ${GAMES[game].short} card builder`;
+  const query = await searchParams;
+  const raw = Array.isArray(query.b) ? query.b[0] : query.b;
+  const catalog = manualCatalog(game);
+  const built = raw
+    ? buildManualProfile(
+        game,
+        decodeBuild(raw, { game, char: catalog.characters[0]?.id ?? "", level: catalog.maxLevel }),
+      )
+    : null;
+  const character = built?.characters[0] ?? null;
+
+  // A shared build carries the build in the URL, so the preview can be that exact card.
+  const title = character
+    ? `${character.name} · manual ${GAMES[game].short} card`
+    : `Manual ${GAMES[game].short} card builder`;
+  const description = character
+    ? `A hand-built ${GAMES[game].label} card for ${character.name} — stats, gear and a PNG export.`
+    : `Type in your ${GAMES[game].label} gear and stats by hand and get the same shareable card and PNG export, no showcase needed.`;
+  const image =
+    raw && character
+      ? {
+          url: `/api/card/${game}/manual?b=${raw}`,
+          width: 1200,
+          height: 630,
+          alt: `${character.name} manual card`,
+        }
+      : ogImage({ title, sub: description, game });
+
   return {
     title,
-    description: `Type in your ${GAMES[game].label} gear and stats by hand and get the same shareable card and PNG export, no showcase needed.`,
+    description,
+    openGraph: { title, description, type: "website", images: [image] },
+    twitter: { card: "summary_large_image", title, description, images: [image.url] },
   };
 }
 

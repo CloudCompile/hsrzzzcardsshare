@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { CopyButton } from "./CopyButton";
+import { ShareButton } from "./ShareButton";
 import { Stars, StatGrid } from "./ui";
 import { CARD_VERSION, GAMES } from "@/lib/site";
 import { encodeBuild } from "@/lib/manualCodec";
@@ -530,6 +531,15 @@ export function ManualBuilder({
             Portrait
           </a>
           <CopyButton value={shareUrl} label="Copy build link" />
+          <ShareButton
+            url={shareUrl}
+            title={`${GAMES[game].short} manual build`}
+            text={`A hand-built ${GAMES[game].label} card on Astra`}
+            file={{
+              href: `/api/card/${game}/manual?b=${encoded}&v=${CARD_VERSION}`,
+              filename: `astra-${game}-manual.png`,
+            }}
+          />
           <button
             type="button"
             onClick={() => setBuild(initialBuild)}

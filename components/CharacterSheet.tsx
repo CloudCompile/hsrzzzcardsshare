@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import { CharacterCorrections } from "./CharacterCorrections";
 import { Stars, StatGrid } from "./ui";
 import { CopyButton } from "./CopyButton";
+import { ShareButton } from "./ShareButton";
 import { fmtInt } from "@/lib/format";
-import { CARD_VERSION } from "@/lib/site";
+import { CARD_VERSION, GAMES } from "@/lib/site";
 import { editParam, type CharacterEdit } from "@/lib/edits";
 import type { Character, Game } from "@/lib/types";
 
@@ -134,6 +135,17 @@ export function CharacterSheet({
               Portrait
             </a>
             <CopyButton value={characterShare} label="Copy card link" />
+            <ShareButton
+              url={characterShare}
+              title={`${character.name} · ${GAMES[game].short}`}
+              text={`${character.name} from ${GAMES[game].label} on Astra`}
+              file={{
+                href: `/api/card/${game}/${uid}?agent=${character.id}${suffix}&v=${CARD_VERSION}`,
+                filename: `astra-${game}-${character.name
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, "-")}.png`,
+              }}
+            />
             <a
               href={`/agent?game=${game}&uid=${uid}&focus=${character.id}`}
               className="btn btn-ghost px-3 py-2 text-[12px]"

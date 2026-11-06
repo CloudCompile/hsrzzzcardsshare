@@ -4,6 +4,8 @@ Paste a Zenless Zone Zero or Honkai: Star Rail UID, get shareable showcase cards
 
 - **Character cards** — level, rarity, element/path, full stat sheet, W-Engine / light cone, drive discs or relics with main stat, sub stats and roll counts.
 - **Team build cards** — pick a lineup from the showcase, name it, share the link or export a PNG.
+- **Link previews** — a profile link unfurls as its profile card, a character link as that character's card, a team link as the team card, and a manual build as the build itself. Everything else falls back to a generated 1200×630 brand image from `/api/og`, so Discord, iMessage, X, Reddit and Slack all show art rather than a bare title.
+- **Native share** — on iOS and Android a Share button hands the card PNG (or the link, where files aren't allowed) to the system sheet. Desktop keeps copy-link.
 - **PNG export** — every card and profile has a generated image at `/api/card/<game>/<uid>`. Add `?view=detail` for the full-sheet card: splash art, panel stats with the base + added split, W-Engine / light cone base stats, every relic sub stat with roll counts, and the set tally.
 - **Manual mode** — no showcase, or building something new? At `/<game>/manual` you type the character, W-Engine/light cone, all six discs or relics and any extra stats yourself. The build is base64url-encoded into `?b=` so the link reproduces the card, and it renders a PNG at `/api/card/<game>/manual?b=…`. Builds autosave to this browser and show up under “Saved builds”.
 - **Saved accounts & corrections** — looking a UID up saves it locally, and a character sheet has a “Corrections” panel for quick fixes (level, weapon level, any stat value) that apply to what you see and download without changing the shareable link.
@@ -70,10 +72,6 @@ Everything third-party the site leans on, and where it stands:
 
 | What | Source | Terms |
 | --- | --- | --- |
-The agent relay is deliberately narrow: https only, `/chat/completions` only, 2 MB body cap, no
-redirects, a 60-second timeout, and a DNS check that refuses any host resolving to a private or
-loopback address. It still has no rate limit of its own.
-
 | Live showcase data | [Enka.Network](https://enka.network) API | Enka's API rules: custom `User-Agent`, no UID enumeration, honour `ttl`. All three are followed (`lib/enka.ts`). |
 | ZZZ agent / W-Engine / disc tables, names, icons | `EnkaNetwork/API-docs` store | Public docs repo; data is HoYoverse's. Baked into `lib/data/*.json` by `scripts/gen-data.mjs`. |
 | HSR characters, light cones, relics, traces, art | [Mar-7th/StarRailRes](https://github.com/Mar-7th/StarRailRes) | **AGPL-3.0**, declared in [`LICENSE-StarRailRes`](./LICENSE-StarRailRes). Baked into `lib/data/hsr.json` by `scripts/gen-data.mjs`; art and icons hotlinked from its jsDelivr CDN. |
@@ -82,6 +80,10 @@ loopback address. It still has no rate limit of its own.
 | Site backdrop, HSR | hsr.hoyoverse.com (`act-webstatic.hoyoverse.com`) | Official key visual, hotlinked from HoYoverse's own CDN. |
 | Fonts — Chakra Petch, Inter, JetBrains Mono | Google Fonts via `next/font` | SIL Open Font License 1.1. Self-hosted at build time; the OFL text is not shipped with them. |
 | Next.js, React, Tailwind CSS | npm | MIT. |
+
+The agent relay is deliberately narrow: https only, `/chat/completions` only, 2 MB body cap, no
+redirects, a 60-second timeout, and a DNS check that refuses any host resolving to a private or
+loopback address. Rate limiting is handled in front of the app rather than in it.
 
 The fan-project notice is not README-only: it sits in the site footer, which the root layout
 renders on every route, and on every exported card (each of the three character cuts, the

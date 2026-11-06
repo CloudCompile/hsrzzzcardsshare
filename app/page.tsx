@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { SavedAccounts } from "@/components/SavedAccounts";
 import { SiteNav } from "@/components/SiteNav";
@@ -5,6 +6,10 @@ import { UidForm } from "@/components/UidForm";
 import { GAMES } from "@/lib/site";
 import zzzJson from "@/lib/data/zzz.json";
 import hsrJson from "@/lib/data/hsr.json";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const zzzAgents = zzzJson.agents as Record<string, { name: string; icon: string | null }>;
 const hsrChars = hsrJson.characters as Record<string, { name: string; portrait: string | null }>;
