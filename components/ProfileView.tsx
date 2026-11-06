@@ -276,8 +276,8 @@ export function ProfileView({
 
         <p className="mt-8 text-[11px] leading-relaxed text-faint">
           Data pulled live from your in-game showcase through Enka.Network. Cards only include the
-          characters you pinned to your profile showcase. Astra is a fan site, not affiliated with or
-          endorsed by HoYoverse. {GAMES[game].label} and its characters are property of HoYoverse.
+          characters you pinned to your profile showcase. {GAMES[game].label} and its characters are
+          property of HoYoverse.
         </p>
       </div>
 

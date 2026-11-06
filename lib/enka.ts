@@ -56,7 +56,14 @@ export function normalizeUid(input: string | null | undefined): string | null {
 }
 
 const ENKA_BASE = "https://enka.network/api";
-const USER_AGENT = "AstraShowcase/1.0 (+https://astra.show)";
+// Enka asks that requests identify themselves with a contact URL, and that URL has to
+// be one that actually reaches the person running this deployment.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : null);
+const USER_AGENT = SITE_URL ? `AstraShowcase/1.0 (+${SITE_URL})` : "AstraShowcase/1.0";
 
 async function enkaFetch<T>(game: Game, uid: string): Promise<T> {
   const url = `${ENKA_BASE}/${game}/uid/${uid}/`;

@@ -320,9 +320,8 @@ export default function HomePage() {
           <div>
             <p className="font-display text-[13px] tracking-[0.1em] text-white/80">ASTRA</p>
             <p className="mt-1 max-w-md text-[11px] leading-relaxed text-faint">
-              Fan site, not affiliated with or endorsed by HoYoverse. Zenless Zone Zero, Honkai: Star
-              Rail and their characters are property of HoYoverse. Showcase data via Enka.Network; game
-              tables via the Enka API docs and StarRailRes; backdrop art from the official game sites.
+              Fan-made showcase cards for Zenless Zone Zero and Honkai: Star Rail. Sources and the
+              fan-project notice are in the site footer below.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-[11px]">

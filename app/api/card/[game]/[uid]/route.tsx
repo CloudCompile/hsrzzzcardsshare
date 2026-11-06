@@ -209,8 +209,6 @@ async function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; g
               "linear-gradient(180deg, rgba(7,7,12,0.82) 0%, rgba(7,7,12,0.12) 18%, rgba(7,7,12,0) 34%, rgba(7,7,12,0.72) 70%, #07070c 100%)",
           }}
         />
-        <CardFrame width={width} height={height} accent={accent} />
-
         <div style={{ display: "flex", flexDirection: "column", padding: 36, height }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
@@ -291,6 +289,8 @@ async function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; g
             <div style={{ display: "flex" }}>{`${profile.characters.length} carded`}</div>
           </div>
         </div>
+        {/* Frame last, so its corner mark paints over the card instead of under the content. */}
+        <CardFrame width={width} height={height} accent={accent} />
       </div>
     ),
     { width, height },

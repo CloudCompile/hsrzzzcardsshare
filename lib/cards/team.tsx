@@ -334,6 +334,9 @@ export function teamCard({
           }}
         >
           <div style={{ display: "flex" }}>TEAM BUILD · ASTRA</div>
+          <div style={{ display: "flex", fontSize: 9, letterSpacing: 1.4, color: "#4a4a5c" }}>
+            Fan-made · not affiliated with HoYoverse
+          </div>
           <div style={{ display: "flex" }}>
             {`${members.length}/${size} SLOTS · ${
               profile.player.uid === "manual" ? "MANUAL BUILD" : `UID ${profile.player.uid}`

@@ -158,6 +158,22 @@ export function CardFrame({ width, height, accent }: { width: number; height: nu
           borderRadius: 2,
         }}
       />
+      {/* The card travels without its page around it, so the notice travels with it. */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 19,
+          left: 0,
+          width,
+          display: "flex",
+          justifyContent: "center",
+          fontSize: 9,
+          letterSpacing: 1.4,
+          color: "rgba(255,255,255,0.32)",
+        }}
+      >
+        Fan-made · not affiliated with HoYoverse
+      </div>
     </>
   );
 }
@@ -763,8 +779,6 @@ export async function portraitCard({
               "linear-gradient(180deg, rgba(7,7,12,0.62) 0%, rgba(7,7,12,0.08) 14%, rgba(7,7,12,0) 30%, rgba(7,7,12,0.62) 42%, rgba(7,7,12,0.94) 52%, #07070c 62%, #07070c 100%)",
           }}
         />
-        <CardFrame width={width} height={height} accent={accent} />
-
         <div style={{ display: "flex", padding: pad, paddingBottom: 0 }}>
           <Brand accent={accent} right={`${GAMES[game].short} · ${profile.player.uid === "manual" ? "MANUAL" : `UID ${profile.player.uid}`}`} />
         </div>
@@ -836,6 +850,8 @@ export async function portraitCard({
             <div style={{ display: "flex" }}>{`${GAMES[game].short} sheet · astra`}</div>
           </div>
         </div>
+        {/* Frame last, so its corner mark paints over the content instead of under it. */}
+        <CardFrame width={width} height={height} accent={accent} />
       </div>
     ),
     { width, height },

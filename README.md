@@ -79,6 +79,10 @@ Everything third-party the site leans on, and where it stands:
 | Fonts — Chakra Petch, Inter, JetBrains Mono | Google Fonts via `next/font` | SIL Open Font License 1.1. Self-hosted at build time; the OFL text is not shipped with them. |
 | Next.js, React, Tailwind CSS | npm | MIT. |
 
+The fan-project notice is not README-only: it sits in the site footer, which the root layout
+renders on every route, and on every exported card (each of the three character cuts, the
+profile card and team builds) so a shared PNG carries it too.
+
 This repository has no `LICENSE` file, so its own code is all rights reserved by default —
 add one if you want others to be able to reuse it.
 
