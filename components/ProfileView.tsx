@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CharacterCard } from "./CharacterCard";
+import { DownloadAll } from "./DownloadAll";
 import { CharacterSheet } from "./CharacterSheet";
 import { TeamBuilder } from "./TeamBuilder";
 import { CopyButton } from "./CopyButton";
@@ -124,10 +125,17 @@ export function ProfileView({
               </button>
               <a
                 href={`/api/card/${game}/${uid}?download=1&v=${CARD_VERSION}`}
-                className="btn btn-primary px-3 py-2.5 text-[12px] sm:py-2"
+                className="btn btn-ghost px-3 py-2.5 text-[12px] sm:py-2"
               >
-                Download PNG
+                Profile card
               </a>
+              <DownloadAll
+                game={game}
+                uid={uid}
+                characters={display}
+                edits={edits}
+                className="col-span-2 sm:col-auto"
+              />
             </div>
           </div>
 
