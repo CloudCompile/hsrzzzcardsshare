@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { getShowcase, normalizeUid } from "@/lib/enka";
 import { buildManualProfile, manualCatalog } from "@/lib/manual";
 import { decodeBuild } from "@/lib/manualCodec";
-import { detailCard, portraitCard, singleCard } from "@/lib/cards/detail";
+import { CardFrame, SplashArt, detailCard, portraitCard, singleCard } from "@/lib/cards/detail";
 import { applyCharacterEdit, decodeEdits, singleEdit } from "@/lib/edits";
 import { teamCard } from "@/lib/cards/team";
 import { GAMES, TEAM_SIZE, isGame } from "@/lib/site";
@@ -18,128 +18,13 @@ function safeName(value: string, fallback: string): string {
 }
 
 
-function Frame({
-  accent,
-  children,
-  width,
-  height,
-}: {
-  accent: string;
-  children: React.ReactNode;
-  width: number;
-  height: number;
-}) {
-  return (
-    <div
-      style={{
-        width,
-        height,
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: BG,
-        color: "#ffffff",
-        fontFamily: "sans-serif",
-        position: "relative",
-        padding: 44,
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          top: -220,
-          left: -160,
-          width: 900,
-          height: 700,
-          borderRadius: 999,
-          background: `linear-gradient(120deg, ${accent}44, transparent)`,
-          display: "flex",
-        }}
-      />
-      {children}
-    </div>
-  );
-}
 
-function Brand({ accent, right }: { accent: string; right: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-      <div style={{ display: "flex", alignItems: "center" }}>
-        <div style={{ display: "flex", width: 12, height: 12, borderRadius: 3, backgroundColor: accent, marginRight: 12 }} />
-        <div style={{ display: "flex", fontSize: 22, letterSpacing: 6, fontWeight: 700 }}>ASTRA</div>
-      </div>
-      <div style={{ display: "flex", fontSize: 18, color: "#7a7a92", letterSpacing: 2 }}>{right}</div>
-    </div>
-  );
-}
 
 
 function uidLabel(profile: ShowcaseProfile): string {
   return profile.player.uid === "manual" ? "MANUAL BUILD" : `UID ${profile.player.uid}`;
 }
 
-function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; game: Game }) {
-  const width = 1200;
-  const height = 630;
-  const accent = GAMES[game].accent;
-  const shown = profile.characters.slice(0, 8);
-
-  return new ImageResponse(
-    (
-      <Frame accent={accent} width={width} height={height}>
-        <Brand accent={accent} right={`${GAMES[game].short} · ${uidLabel(profile)}`} />
-        <div style={{ display: "flex", alignItems: "flex-end", marginTop: 24 }}>
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            <div style={{ display: "flex", fontSize: 52, fontWeight: 700 }}>
-              {safeName(profile.player.nickname, "Showcase")}
-            </div>
-            <div style={{ display: "flex", fontSize: 20, color: "#8f8fa6", marginTop: 8 }}>
-              {`Level ${profile.player.level} · ${profile.characters.length} on showcase`}
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", marginTop: 24, flexGrow: 1 }}>
-          {shown.map((character) => (
-            <div
-              key={character.id}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                width: 128,
-                marginRight: 14,
-                padding: 10,
-                borderRadius: 12,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.07)",
-              }}
-            >
-              {character.icon ? (
-                // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-                <img
-                  src={character.icon}
-                  width={104}
-                  height={104}
-                  style={{ borderRadius: 10, objectFit: "cover" }}
-                />
-              ) : null}
-              <div style={{ display: "flex", fontSize: 16, marginTop: 8, color: "#e8e5f2" }}>
-                {safeName(character.name, "—")}
-              </div>
-              <div style={{ display: "flex", fontSize: 14, color: character.elementColor }}>
-                {`Lv.${character.level} · ${character.element}`}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ display: "flex", fontSize: 17, color: "#6f6f86", borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: 14 }}>
-          {`${GAMES[game].label} showcase · astra`}
-        </div>
-      </Frame>
-    ),
-    { width, height },
-  );
-}
 
 function FallbackImage(message: string) {
   const width = 1200;
@@ -262,4 +147,143 @@ export async function GET(
   }
 
   return response;
+}
+
+/**
+ * Profile card: the top character's art runs under the account summary, with the
+ * roster as a glass strip, so the account image matches the character cards.
+ */
+function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; game: Game }) {
+  const width = 1200;
+  const height = 630;
+  const accent = GAMES[game].accent;
+  const shown = profile.characters.slice(0, 8);
+  const hero = profile.characters[0];
+
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          width,
+          height,
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: BG,
+          color: "#ffffff",
+          fontFamily: "sans-serif",
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {hero ? <SplashArt character={hero} width={width} height={height} focus={hero.kind === "zzz" ? 0.03 : 0} /> : null}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width,
+            height,
+            display: "flex",
+            background:
+              "linear-gradient(90deg, rgba(7,7,12,0.95) 0%, rgba(7,7,12,0.86) 32%, rgba(7,7,12,0.46) 58%, rgba(7,7,12,0.18) 100%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width,
+            height,
+            display: "flex",
+            background:
+              "linear-gradient(180deg, rgba(7,7,12,0.82) 0%, rgba(7,7,12,0.12) 18%, rgba(7,7,12,0) 34%, rgba(7,7,12,0.72) 70%, #07070c 100%)",
+          }}
+        />
+        <CardFrame width={width} height={height} accent={accent} />
+
+        <div style={{ display: "flex", flexDirection: "column", padding: 36, height }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <div style={{ display: "flex", width: 10, height: 10, borderRadius: 3, backgroundColor: accent, marginRight: 10 }} />
+              <div style={{ display: "flex", fontSize: 15, letterSpacing: 6, fontWeight: 700 }}>ASTRA</div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                fontSize: 11,
+                letterSpacing: 2,
+                color: "#d7d5e4",
+                padding: "5px 10px",
+                borderRadius: 6,
+                backgroundColor: "rgba(6,6,11,0.66)",
+                border: "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              {`${GAMES[game].short} · ${uidLabel(profile)}`}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexGrow: 1 }} />
+
+          <div style={{ display: "flex", fontSize: 62, fontWeight: 700, lineHeight: 1, letterSpacing: -1.5 }}>
+            {safeName(profile.player.nickname, "Showcase")}
+          </div>
+          <div style={{ display: "flex", fontSize: 13, color: "#a8a4bb", marginTop: 8, letterSpacing: 1 }}>
+            {`Level ${profile.player.level} · ${profile.characters.length} on showcase`}
+          </div>
+
+          <div style={{ display: "flex", marginTop: 18 }}>
+            {shown.map((character) => (
+              <div
+                key={character.id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "6px 9px",
+                  marginRight: 8,
+                  borderRadius: 8,
+                  background: "rgba(8,8,15,0.6)",
+                  border: "1px solid rgba(255,255,255,0.085)",
+                }}
+              >
+                {character.icon ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={character.icon}
+                    width={30}
+                    height={30}
+                    style={{ borderRadius: 999, marginRight: 8, objectFit: "cover" }}
+                  />
+                ) : null}
+                <div style={{ display: "flex", flexDirection: "column" }}>
+                  <div style={{ display: "flex", fontSize: 12, color: "#e8e5f2" }}>{safeName(character.name, "—")}</div>
+                  <div style={{ display: "flex", fontSize: 9.5, color: character.elementColor }}>
+                    {`Lv.${character.level} · ${character.element}`}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              borderTop: "1px solid rgba(255,255,255,0.09)",
+              marginTop: 16,
+              paddingTop: 10,
+              fontSize: 11,
+              color: "#7c7893",
+            }}
+          >
+            <div style={{ display: "flex" }}>{`${GAMES[game].label} showcase · astra`}</div>
+            <div style={{ display: "flex" }}>{`${profile.characters.length} carded`}</div>
+          </div>
+        </div>
+      </div>
+    ),
+    { width, height },
+  );
 }
