@@ -41,7 +41,7 @@ export const TEAM_SIZE: Record<Game, number> = { zzz: 3, hsr: 4 };
  * These are version-scoped paths, so a future version banner will rotate them away.
  */
 export const GAME_BACKDROP: Record<Game, string> = {
-  zzz: "https://act-webstatic.hoyoverse.com/puzzle/zzz/pz_ZYBGoSIMEV/resource/puzzle/2026/10/08/3fda8ae46a697966e84e3ad46d22cf26_565055650122263887.png?x-oss-process=image/format,webp/quality,Q_90",
+  zzz: "https://act-webstatic.hoyoverse.com/puzzle/zzz/pz_ZYBGoSIMEV/resource/puzzle/2026/10/08/770d961b2922411c65767a8a035aad81_4279291793879784965.png?x-oss-process=image/format,webp/quality,Q_90",
   hsr: "https://act-webstatic.hoyoverse.com/puzzle/hkrpg/pz_sEswxe8sSg/resource/puzzle/2026/09/04/33367b8a124f5283012ba6afa614f003_8360406952295795431.png?x-oss-process=image/format,webp/quality,Q_90",
 };
 
