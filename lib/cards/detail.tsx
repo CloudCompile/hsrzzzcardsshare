@@ -200,7 +200,12 @@ function StatLine({ row, compact = false }: { row: StatRow; compact?: boolean })
         alignItems: "center",
         justifyContent: "space-between",
         padding: compact ? "5px 10px" : "8px 12px",
-        marginBottom: compact ? 5 : 6,
+        marginBottom: compact ? 5 : 8,
+        // Fixed height and no shrinking: a card with six discs has more content than
+        // one with three, and letting the flex box squeeze these rows made them
+        // overlap their own detail line instead of pushing the block up.
+        flexShrink: 0,
+        height: compact ? 46 : 62,
         borderRadius: 8,
         background: GLASS,
         border: LINE,
@@ -716,7 +721,7 @@ export function portraitCard({
 
         <div style={{ display: "flex", flexGrow: 1 }} />
 
-        <div style={{ display: "flex", flexDirection: "column", padding: pad, paddingTop: 0 }}>
+        <div style={{ display: "flex", flexDirection: "column", padding: pad, paddingTop: 0, flexShrink: 0 }}>
           <Stars count={character.rarity} />
           <div style={{ display: "flex", fontSize: 66, fontWeight: 700, marginTop: 6, lineHeight: 1, letterSpacing: -1.5 }}>
             {safeName(character.name, "Character")}
@@ -791,6 +796,12 @@ export function portraitCard({
  * Compact character card: the splash art is the card, with the panel, engine and
  * disc mains stacked over it in glass.
  */
+/**
+ * Compact character card: the splash art is the card, with the panel, engine and
+ * disc mains stacked over it in glass. The content is pinned to the bottom rather
+ * than flowing after a spacer, so a taller set of discs can never compress the
+ * stat rows into each other.
+ */
 export function singleCard({
   character,
   profile,
@@ -803,6 +814,7 @@ export function singleCard({
   const width = 1080;
   const height = 1350;
   const pad = 40;
+  const gap = 12;
   const accent = character.accent;
   const isZzz = character.kind === "zzz";
   const stats = character.sheet.slice(0, 8);
@@ -811,8 +823,9 @@ export function singleCard({
   const gear = character.gear.slice(0, 6);
   const weapon = character.weapon;
   const maxLevel = isZzz ? 60 : 80;
-  const gap = 12;
-  const gearWidth = Math.floor((width - pad * 2 - gap) / 2);
+  const contentWidth = width - pad * 2;
+  const columnWidth = Math.floor((contentWidth - 10) / 2);
+  const gearWidth = Math.floor((contentWidth - gap) / 2);
 
   return new ImageResponse(
     (
@@ -821,7 +834,6 @@ export function singleCard({
           width,
           height,
           display: "flex",
-          flexDirection: "column",
           backgroundColor: BG,
           color: "#ffffff",
           fontFamily: "sans-serif",
@@ -830,6 +842,9 @@ export function singleCard({
         }}
       >
         <SplashArt character={character} width={width} height={height} focus={isZzz ? 0.02 : 0} />
+
+        {/* A long dissolve: the art keeps showing behind the panel instead of ending
+            in a hard band under the name. */}
         <div
           style={{
             position: "absolute",
@@ -839,20 +854,27 @@ export function singleCard({
             height,
             display: "flex",
             background:
-              "linear-gradient(180deg, rgba(7,7,12,0.66) 0%, rgba(7,7,12,0.1) 13%, rgba(7,7,12,0) 28%, rgba(7,7,12,0.5) 44%, rgba(7,7,12,0.93) 55%, #07070c 64%, #07070c 100%)",
+              "linear-gradient(180deg, rgba(7,7,12,0.62) 0%, rgba(7,7,12,0.08) 14%, rgba(7,7,12,0) 32%, rgba(7,7,12,0.22) 42%, rgba(7,7,12,0.44) 52%, rgba(7,7,12,0.66) 62%, rgba(7,7,12,0.84) 72%, rgba(7,7,12,0.95) 82%, #07070c 90%, #07070c 100%)",
           }}
         />
         <CardFrame width={width} height={height} accent={accent} />
 
-        <div style={{ display: "flex", padding: pad, paddingBottom: 0 }}>
+        <div style={{ position: "absolute", top: pad, left: pad, width: contentWidth, display: "flex" }}>
           <Brand accent={accent} right={`${GAMES[game].short} · ${profile.player.uid === "manual" ? "MANUAL" : `UID ${profile.player.uid}`}`} />
         </div>
 
-        <div style={{ display: "flex", flexGrow: 1 }} />
-
-        <div style={{ display: "flex", flexDirection: "column", padding: pad, paddingTop: 0 }}>
+        <div
+          style={{
+            position: "absolute",
+            left: pad,
+            bottom: pad,
+            width: contentWidth,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <Stars count={character.rarity} />
-          <div style={{ display: "flex", fontSize: 78, fontWeight: 700, marginTop: 6, lineHeight: 1, letterSpacing: -2 }}>
+          <div style={{ display: "flex", fontSize: 76, fontWeight: 700, marginTop: 6, lineHeight: 1, letterSpacing: -2 }}>
             {safeName(character.name, "Character")}
           </div>
           <div style={{ display: "flex", alignItems: "center", marginTop: 10 }}>
@@ -864,14 +886,14 @@ export function singleCard({
             </div>
           </div>
 
-          <div style={{ display: "flex", marginTop: 14 }}>
+          <div style={{ display: "flex", marginTop: 16 }}>
             {statColumns.map((column, index) => (
               <div
                 key={index}
                 style={{
                   display: "flex",
                   flexDirection: "column",
-                  flexGrow: 1,
+                  width: columnWidth,
                   marginRight: index === statColumns.length - 1 ? 0 : 10,
                 }}
               >
@@ -887,7 +909,7 @@ export function singleCard({
           {sets.length ? <div style={{ display: "flex", marginTop: 10 }}><SetChips sets={sets} accent={accent} /></div> : null}
 
           {gear.length ? (
-            <div style={{ display: "flex", flexDirection: "column", marginTop: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", marginTop: 8 }}>
               <div style={{ display: "flex", alignItems: "center", marginBottom: 7 }}>
                 <Eyebrow label={isZzz ? "DRIVE DISCS" : "RELICS"} accent={accent} />
               </div>
