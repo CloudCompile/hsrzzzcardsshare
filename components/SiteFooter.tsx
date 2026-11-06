@@ -27,7 +27,8 @@ export function SiteFooter() {
           >
             StarRailRes
           </a>
-          ; backdrop art from the official game sites. Everything Astra shows here is generated from your
+          ; HSR game tables from StarRailRes are AGPL-3.0, licence text in the repository; backdrop art from
+          the official game sites. Everything Astra shows here is generated from your
           public in-game showcase.
         </p>
       </div>

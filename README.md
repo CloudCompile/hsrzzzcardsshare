@@ -76,7 +76,7 @@ loopback address. It still has no rate limit of its own.
 
 | Live showcase data | [Enka.Network](https://enka.network) API | Enka's API rules: custom `User-Agent`, no UID enumeration, honour `ttl`. All three are followed (`lib/enka.ts`). |
 | ZZZ agent / W-Engine / disc tables, names, icons | `EnkaNetwork/API-docs` store | Public docs repo; data is HoYoverse's. Baked into `lib/data/*.json` by `scripts/gen-data.mjs`. |
-| HSR characters, light cones, relics, traces, art | [Mar-7th/StarRailRes](https://github.com/Mar-7th/StarRailRes) | **AGPL-3.0.** Baked into `lib/data/*.json`; art and icons hotlinked from its jsDelivr CDN. |
+| HSR characters, light cones, relics, traces, art | [Mar-7th/StarRailRes](https://github.com/Mar-7th/StarRailRes) | **AGPL-3.0**, declared in [`LICENSE-StarRailRes`](./LICENSE-StarRailRes). Baked into `lib/data/hsr.json` by `scripts/gen-data.mjs`; art and icons hotlinked from its jsDelivr CDN. |
 | Game names, character art, in-game icons | HoYoverse / miHoYo | © HoYoverse. Used without a licence under the fan-project tolerance described in their fan-use policy, not a grant. |
 | Site backdrop, ZZZ | zenless.hoyoverse.com (`act-webstatic.hoyoverse.com`) | Official key visual, hotlinked from HoYoverse's own CDN. |
 | Site backdrop, HSR | hsr.hoyoverse.com (`act-webstatic.hoyoverse.com`) | Official key visual, hotlinked from HoYoverse's own CDN. |
@@ -92,11 +92,19 @@ add one if you want others to be able to reuse it.
 
 Outstanding decisions:
 
-- **StarRailRes is AGPL-3.0.** The HSR tables in `lib/data/*.json` are derived from it, and its
-  images are hotlinked. Attribution is in place but no licence notice or source offer is. Whether
-  that copyleft reaches a site that only consumes the data is a question for someone qualified to
-  answer it; the low-risk path is to switch the tables and art to Enka's own store, which has no
-  such licence.
+- **StarRailRes is AGPL-3.0, and that is declared rather than engineered away.** `lib/data/hsr.json`
+  is a derived work: `scripts/gen-data.mjs` builds it from seven StarRailRes index files
+  (`characters`, `light_cones`, `relic_sets`, `elements`, `paths`, `character_promotions`,
+  `character_skill_trees`). The licence ships in [`LICENSE-StarRailRes`](./LICENSE-StarRailRes) and is
+  credited in the README and the site footer. The generator and the generated output are both in this
+  repository, which is the Corresponding Source the licence asks for — keep it that way by
+  regenerating with `npm run data` instead of hand-editing the JSON.
+
+  There is no clean swap. Enka's store carries only HSR `avatars.json` and `weapons.json` — no light
+  cones, relic sets, promotion curves, trace trees or English names (the ZZZ tables are fully covered
+  there, which is why the constraint is HSR-only). The upstream StarRailRes credits,
+  `Dimbreath/StarRailData`, is offline with HTTP 451. So the position is: this data is AGPL-3.0, we
+  say so, and we ship the means to rebuild it.
 - **Backdrop URLs are version-scoped.** Both point at the key visual from a specific version's
   official site banner, so a future version will rotate the artwork away. Nothing breaks if the
   file is removed — the layer just has no image — but the art should be refreshed per version.
