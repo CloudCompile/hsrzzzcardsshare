@@ -63,3 +63,31 @@ Import the repo into Vercel and deploy — no environment variables required. Se
 `NEXT_PUBLIC_SITE_URL` if you use a custom domain so Open Graph URLs resolve absolutely.
 
 Fan project, not affiliated with HoYoverse.
+
+## Credits and licensing
+
+Everything third-party the site leans on, and where it stands:
+
+| What | Source | Terms |
+| --- | --- | --- |
+| Live showcase data | [Enka.Network](https://enka.network) API | Enka's API rules: custom `User-Agent`, no UID enumeration, honour `ttl`. All three are followed (`lib/enka.ts`). |
+| ZZZ agent / W-Engine / disc tables, names, icons | `EnkaNetwork/API-docs` store | Public docs repo; data is HoYoverse's. Baked into `lib/data/*.json` by `scripts/gen-data.mjs`. |
+| HSR characters, light cones, relics, traces, art | [Mar-7th/StarRailRes](https://github.com/Mar-7th/StarRailRes) | **AGPL-3.0.** Baked into `lib/data/*.json`; art and icons hotlinked from its jsDelivr CDN. |
+| Game names, character art, in-game icons | HoYoverse / miHoYo | © HoYoverse. Used uncredited-by-licence under the fan-project understanding, not an actual grant. |
+| Site backdrop, ZZZ | Game Rant (Valnet) | © Valnet / Game Rant. **Hotlinked with no licence granted** — the one asset here with no defensible basis. |
+| Site backdrop, HSR | HoYoLAB BBS upload | A user upload of HoYoverse key art. Hotlinked; the poster's upload, not an official asset URL. |
+| Fonts — Chakra Petch, Inter, JetBrains Mono | Google Fonts via `next/font` | SIL Open Font License 1.1. Self-hosted at build time; the OFL text is not shipped with them. |
+| Next.js, React, Tailwind CSS | npm | MIT. |
+
+This repository has no `LICENSE` file, so its own code is all rights reserved by default —
+add one if you want others to be able to reuse it.
+
+Outstanding decisions:
+
+- **StarRailRes is AGPL-3.0.** The HSR tables in `lib/data/*.json` are derived from it, and its
+  images are hotlinked. Attribution is in place but no licence notice or source offer is. Whether
+  that copyleft reaches a site that only consumes the data is a question for someone qualified to
+  answer it; the low-risk path is to switch the tables and art to Enka's own store, which has no
+  such licence.
+- **The ZZZ backdrop is a press-site image.** Replace it with a HoYoverse-hosted asset (HoYoLAB's
+  upload CDN, as the HSR one uses) before the site gets traffic.

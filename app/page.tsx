@@ -321,7 +321,8 @@ export default function HomePage() {
             <p className="font-display text-[13px] tracking-[0.1em] text-white/80">ASTRA</p>
             <p className="mt-1 max-w-md text-[11px] leading-relaxed text-faint">
               Fan-made showcase cards. Not affiliated with HoYoverse. Showcase data via Enka.Network;
-              game tables via the Enka API docs and StarRailRes.
+              game tables via the Enka API docs and StarRailRes. Game names, icons and art belong to
+              HoYoverse and miHoYo; backdrop key art via HoYoLAB and Game Rant.
             </p>
           </div>
           <div className="flex flex-wrap gap-2 text-[11px]">
