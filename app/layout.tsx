@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Chakra_Petch, Inter, JetBrains_Mono } from "next/font/google";
+import { SiteBackdrop } from "@/components/SiteBackdrop";
 import "./globals.css";
 
 const chakra = Chakra_Petch({
@@ -62,7 +63,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${chakra.variable} ${inter.variable} ${mono.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <SiteBackdrop />
+        <div className="relative z-10">{children}</div>
+      </body>
     </html>
   );
 }

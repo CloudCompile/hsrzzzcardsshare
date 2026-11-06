@@ -32,6 +32,17 @@ export const GAMES: Record<
 export const TEAM_SIZE: Record<Game, number> = { zzz: 3, hsr: 4 };
 
 /**
+ * Site backdrop art. Each game's page is dressed with one standing splash from the
+ * same CDNs the cards already pull from, so the site reads as that game while you
+ * are in it. Kept as URLs rather than bundled files: the art is licensed third-party
+ * material the app links to, it is not redistributed here.
+ */
+export const GAME_BACKDROP: Record<Game, string> = {
+  zzz: "https://enka.network/ui/zzz/IconRole67.png",
+  hsr: "https://cdn.jsdelivr.net/gh/Mar-7th/StarRailRes@master/image/character_portrait/1310.png",
+};
+
+/**
  * Card artwork version. Download URLs are cached hard by the browser (the PNG
  * response is served immutable for a year), so the version rides in the URL and
  * bumping it is what actually hands people a redrawn card.
