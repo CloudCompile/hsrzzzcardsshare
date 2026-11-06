@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { imageAspect } from "@/lib/cards/artSize";
 import { GAMES } from "@/lib/site";
 import { fmtInt } from "@/lib/format";
 import type { Character, Game, GearPiece, SetGroup, ShowcaseProfile, StatRow, WeaponInfo } from "@/lib/types";
@@ -21,21 +22,25 @@ export function SplashArt({
   character,
   width,
   height,
+  aspect,
   focus = 0.02,
   opacity = 1,
 }: {
   character: Character;
   width: number;
   height: number;
+  /** The portrait's real width / height, so it is never stretched to fit. */
+  aspect: number;
   focus?: number;
   opacity?: number;
 }) {
   const accent = character.accent;
   // Satori drops object-position percentages, so the crop is done by hand: scale
-  // the art to cover the card and shift it so `focus` picks the visible band.
-  const aspect = character.kind === "zzz" ? 1132 / 2120 : 1;
-  const artHeight = Math.max(height, width / aspect);
-  const artWidth = artHeight * aspect;
+  // the art past the card edges and shift it so `focus` picks the visible band.
+  // Both dimensions come from the art's own ratio, so it is cropped, never squashed.
+  const ratio = aspect > 0 ? aspect : 1;
+  const artHeight = Math.max(height, width / ratio);
+  const artWidth = artHeight * ratio;
   const top = -Math.max(0, artHeight - height) * focus;
   const left = -(artWidth - width) / 2;
   return (
@@ -445,7 +450,7 @@ function rankLine(character: Character): string {
  * Full character sheet card. The splash art runs across the whole card; the panel
  * and gear sit on it as glass, so the art still reads through the numbers.
  */
-export function detailCard({
+export async function detailCard({
   character,
   profile,
   game,
@@ -453,7 +458,8 @@ export function detailCard({
   character: Character;
   profile: ShowcaseProfile;
   game: Game;
-}): ImageResponse {
+}): Promise<ImageResponse> {
+  const aspect = await imageAspect(character.portrait, character.kind === "zzz" ? 1132 / 2120 : 1);
   const width = 1600;
   const height = 900;
   const accent = character.accent;
@@ -483,7 +489,7 @@ export function detailCard({
           overflow: "hidden",
         }}
       >
-        <SplashArt character={character} width={width} height={height} focus={isZzz ? 0.06 : 0} />
+        <SplashArt character={character} width={width} height={height} aspect={aspect} focus={isZzz ? 0.06 : 0} opacity={0.85} />
 
         {/* Scrims: readable text on the left, readable panels on the right, art between. */}
         <div
@@ -495,7 +501,7 @@ export function detailCard({
             height,
             display: "flex",
             background:
-              "linear-gradient(90deg, rgba(7,7,12,0.97) 0%, rgba(7,7,12,0.9) 22%, rgba(7,7,12,0.52) 42%, rgba(7,7,12,0.1) 58%, rgba(7,7,12,0.55) 78%, rgba(7,7,12,0.93) 100%)",
+              "linear-gradient(90deg, rgba(7,7,12,0.97) 0%, rgba(7,7,12,0.92) 20%, rgba(7,7,12,0.8) 34%, rgba(7,7,12,0.62) 50%, rgba(7,7,12,0.64) 72%, rgba(7,7,12,0.86) 90%, rgba(7,7,12,0.95) 100%)",
           }}
         />
         <div
@@ -660,7 +666,7 @@ export function detailCard({
  * Portrait cut: the splash art fills the card and the sheet sits on it below the
  * character's head, so the whole thing reads as one image rather than a banner.
  */
-export function portraitCard({
+export async function portraitCard({
   character,
   profile,
   game,
@@ -668,7 +674,8 @@ export function portraitCard({
   character: Character;
   profile: ShowcaseProfile;
   game: Game;
-}): ImageResponse {
+}): Promise<ImageResponse> {
+  const aspect = await imageAspect(character.portrait, character.kind === "zzz" ? 1132 / 2120 : 1);
   const width = 1080;
   const height = 1350;
   const pad = 38;
@@ -700,7 +707,7 @@ export function portraitCard({
           overflow: "hidden",
         }}
       >
-        <SplashArt character={character} width={width} height={height} focus={isZzz ? 0.02 : 0} />
+        <SplashArt character={character} width={width} height={height} aspect={aspect} focus={isZzz ? 0.02 : 0} />
         <div
           style={{
             position: "absolute",
@@ -802,7 +809,7 @@ export function portraitCard({
  * than flowing after a spacer, so a taller set of discs can never compress the
  * stat rows into each other.
  */
-export function singleCard({
+export async function singleCard({
   character,
   profile,
   game,
@@ -810,7 +817,8 @@ export function singleCard({
   character: Character;
   profile: ShowcaseProfile;
   game: Game;
-}): ImageResponse {
+}): Promise<ImageResponse> {
+  const aspect = await imageAspect(character.portrait, character.kind === "zzz" ? 1132 / 2120 : 1);
   const width = 1080;
   const height = 1350;
   const pad = 40;
@@ -841,7 +849,7 @@ export function singleCard({
           overflow: "hidden",
         }}
       >
-        <SplashArt character={character} width={width} height={height} focus={isZzz ? 0.02 : 0} />
+        <SplashArt character={character} width={width} height={height} aspect={aspect} focus={isZzz ? 0.02 : 0} />
 
         {/* A long dissolve: the art keeps showing behind the panel instead of ending
             in a hard band under the name. */}

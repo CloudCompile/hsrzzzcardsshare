@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { getShowcase, normalizeUid } from "@/lib/enka";
 import { buildManualProfile, manualCatalog } from "@/lib/manual";
 import { decodeBuild } from "@/lib/manualCodec";
+import { imageAspect } from "@/lib/cards/artSize";
 import { CardFrame, SplashArt, detailCard, portraitCard, singleCard } from "@/lib/cards/detail";
 import { applyCharacterEdit, decodeEdits, singleEdit } from "@/lib/edits";
 import { teamCard } from "@/lib/cards/team";
@@ -79,10 +80,10 @@ export async function GET(
     if (!manualProfile || !manualCharacter) return FallbackImage("Manual card unavailable");
 
     const card = portrait
-      ? portraitCard({ character: manualCharacter, profile: manualProfile, game })
+      ? await portraitCard({ character: manualCharacter, profile: manualProfile, game })
       : detail
-        ? detailCard({ character: manualCharacter, profile: manualProfile, game })
-        : singleCard({ character: manualCharacter, profile: manualProfile, game });
+        ? await detailCard({ character: manualCharacter, profile: manualProfile, game })
+        : await singleCard({ character: manualCharacter, profile: manualProfile, game });
     if (download) {
       const slug = manualCharacter.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       const suffix = portrait ? "-portrait" : detail ? "-detail" : "";
@@ -123,10 +124,10 @@ export async function GET(
       localEdit,
     );
     response = portrait
-      ? portraitCard({ character, profile, game })
+      ? await portraitCard({ character, profile, game })
       : detail
-        ? detailCard({ character, profile, game })
-        : singleCard({ character, profile, game });
+        ? await detailCard({ character, profile, game })
+        : await singleCard({ character, profile, game });
     filename = `astra-${game}-${normalized}-${character.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")}${portrait ? "-portrait" : detail ? "-detail" : ""}.png`;
@@ -138,7 +139,7 @@ export async function GET(
     response = teamCard({ members, profile, game, title });
     filename = `astra-${game}-${normalized}-team.png`;
   } else {
-    response = ProfileCardImage({ profile, game });
+    response = await ProfileCardImage({ profile, game });
   }
 
   if (download) {
@@ -157,12 +158,13 @@ export async function GET(
  * Profile card: the top character's art runs under the account summary, with the
  * roster as a glass strip, so the account image matches the character cards.
  */
-function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; game: Game }) {
+async function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; game: Game }): Promise<ImageResponse> {
   const width = 1200;
   const height = 630;
   const accent = GAMES[game].accent;
   const shown = profile.characters.slice(0, 8);
   const hero = profile.characters[0];
+  const aspect = await imageAspect(hero?.portrait ?? null, hero?.kind === "zzz" ? 1132 / 2120 : 1);
 
   return new ImageResponse(
     (
@@ -179,7 +181,9 @@ function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; game: G
           overflow: "hidden",
         }}
       >
-        {hero ? <SplashArt character={hero} width={width} height={height} focus={hero.kind === "zzz" ? 0.03 : 0} /> : null}
+        {hero ? (
+          <SplashArt character={hero} width={width} height={height} aspect={aspect} focus={hero.kind === "zzz" ? 0.03 : 0} />
+        ) : null}
         <div
           style={{
             position: "absolute",
