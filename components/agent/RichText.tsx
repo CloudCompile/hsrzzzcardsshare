@@ -353,6 +353,36 @@ function renderChildren(nodes: Node[], key: string): ReactNode[] {
   return nodes.map((node, index) => renderNode(node, `${key}-${index}`));
 }
 
+/**
+ * Models given colour and motion tend to use all of it. This caps how many
+ * animated phrases a single reply may carry; the rest keep their colour and
+ * font but lose the animation, so emphasis stays meaningful.
+ */
+export const MOTION_BUDGET = 2;
+
+const MOTION_NAMES = new Set([...Object.keys(MOTION), "wave"]);
+
+export function applyMotionBudget(value: string, max = MOTION_BUDGET): string {
+  let used = 0;
+
+  return value.replace(/<span\b([^>]*)>/gi, (whole, attrs: string) => {
+    const classAttr = /class\s*=\s*(?:"([^"]*)"|'([^']*)')/i.exec(attrs);
+    if (!classAttr) return whole;
+
+    const tokens = (classAttr[1] ?? classAttr[2] ?? "").split(/\s+/).filter(Boolean);
+    if (!tokens.some((token) => MOTION_NAMES.has(token.toLowerCase()))) return whole;
+
+    if (used < max) {
+      used += 1;
+      return whole;
+    }
+
+    const kept = tokens.filter((token) => !MOTION_NAMES.has(token.toLowerCase()));
+    const replacement = kept.length ? `class="${kept.join(" ")}"` : "";
+    return `<span${attrs.replace(classAttr[0], replacement)}>`;
+  });
+}
+
 /** Renders one inline run, including any safe HTML the model wrote. */
 export function inline(value: string, prefix: string): ReactNode[] {
   // A half-streamed tag would otherwise flash as raw markup. Only strip what

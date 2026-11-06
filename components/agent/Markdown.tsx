@@ -11,7 +11,7 @@ import {
   parseChart,
   parseNote,
 } from "./Artifacts";
-import { inline } from "./RichText";
+import { applyMotionBudget, inline } from "./RichText";
 
 /**
  * Markdown subset for chat replies: headings, lists, tables, fenced code,
@@ -19,7 +19,7 @@ import { inline } from "./RichText";
  * safe inline HTML subset handled by RichText.
  */
 export function Markdown({ text, profile }: { text: string; profile?: ShowcaseProfile | null }) {
-  const blocks = useMemo(() => parse(text, profile ?? null), [text, profile]);
+  const blocks = useMemo(() => parse(applyMotionBudget(text), profile ?? null), [text, profile]);
   return <div className="space-y-2.5">{blocks}</div>;
 }
 
