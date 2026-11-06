@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og";
 import { getShowcase, normalizeUid } from "@/lib/enka";
 import { buildManualProfile, manualCatalog } from "@/lib/manual";
 import { decodeBuild } from "@/lib/manualCodec";
-import { detailCard, portraitCard } from "@/lib/cards/detail";
+import { detailCard, portraitCard, singleCard } from "@/lib/cards/detail";
 import { applyCharacterEdit, decodeEdits, singleEdit } from "@/lib/edits";
 import { teamCard } from "@/lib/cards/team";
 import { GAMES, TEAM_SIZE, isGame } from "@/lib/site";
@@ -17,25 +17,6 @@ function safeName(value: string, fallback: string): string {
   return cleaned.length ? cleaned : fallback;
 }
 
-function Pill({ label, value }: { label: string; value: string }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        width: "100%",
-        padding: "8px 12px",
-        borderRadius: 8,
-        background: "rgba(255,255,255,0.045)",
-        border: "1px solid rgba(255,255,255,0.07)",
-      }}
-    >
-      <div style={{ display: "flex", fontSize: 17, color: "#8f8fa6", letterSpacing: 1 }}>{label}</div>
-      <div style={{ display: "flex", fontSize: 20, color: "#ffffff", fontWeight: 600 }}>{value}</div>
-    </div>
-  );
-}
 
 function Frame({
   accent,
@@ -91,204 +72,9 @@ function Brand({ accent, right }: { accent: string; right: string }) {
   );
 }
 
-function characterSize(character: Character): "zzz" | "hsr" {
-  return character.kind;
-}
 
 function uidLabel(profile: ShowcaseProfile): string {
   return profile.player.uid === "manual" ? "MANUAL BUILD" : `UID ${profile.player.uid}`;
-}
-
-function SingleCard({
-  character,
-  profile,
-  game,
-}: {
-  character: Character;
-  profile: ShowcaseProfile;
-  game: Game;
-}) {
-  const width = 1080;
-  const height = 1350;
-  const accent = character.accent;
-  const top = character.sheet.slice(0, 8);
-
-  return new ImageResponse(
-    (
-      <Frame accent={accent} width={width} height={height}>
-        <Brand accent={accent} right={`${GAMES[game].short} · ${uidLabel(profile)}`} />
-
-        <div style={{ display: "flex", alignItems: "center", marginTop: 48 }}>
-          {character.icon ? (
-            // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-            <img
-              src={character.icon}
-              width={168}
-              height={168}
-              style={{ borderRadius: 26, border: `2px solid ${accent}`, objectFit: "cover" }}
-            />
-          ) : null}
-          <div style={{ display: "flex", flexDirection: "column", marginLeft: 28, maxWidth: 700 }}>
-            <div style={{ display: "flex", fontSize: 66, fontWeight: 700, lineHeight: 1 }}>
-              {safeName(character.name, "Character")}
-            </div>
-            <div style={{ display: "flex", alignItems: "center", marginTop: 16, fontSize: 24, color: "#b7b3c9" }}>
-              <div style={{ display: "flex", alignItems: "center", marginRight: 14 }}>
-                {Array.from({ length: character.rarity }).map((_, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      display: "flex",
-                      width: 13,
-                      height: 13,
-                      marginRight: 5,
-                      backgroundColor: "#ffd977",
-                      transform: "rotate(45deg)",
-                      borderRadius: 2,
-                    }}
-                  />
-                ))}
-              </div>
-              <div style={{ display: "flex", marginRight: 12 }}>{`Lv.${character.level}`}</div>
-              <div style={{ display: "flex", color: accent }}>{character.element}</div>
-              <div style={{ display: "flex", marginLeft: 12, color: "#7a7a92" }}>
-                {character.kind === "zzz"
-                  ? `${character.profession} · Core ${character.coreRank}`
-                  : `${character.pathName} · E${character.eidolon}`}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexWrap: "wrap", marginTop: 40 }}>
-          {top.map((row) => (
-            <div key={row.label} style={{ display: "flex", width: "50%", paddingRight: 14, paddingBottom: 14 }}>
-              <div style={{ display: "flex", width: "100%" }}>
-                <Pill label={row.label} value={row.value} />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {character.weapon ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginTop: 12,
-              padding: "16px 18px",
-              borderRadius: 12,
-              background: "rgba(255,255,255,0.035)",
-              border: "1px solid rgba(255,255,255,0.07)",
-            }}
-          >
-            {character.weapon.icon ? (
-              // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-              <img
-                src={character.weapon.icon}
-                width={64}
-                height={64}
-                style={{ borderRadius: 12, objectFit: "cover", marginRight: 18 }}
-              />
-            ) : null}
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ display: "flex", fontSize: 22, color: "#ffffff" }}>{safeName(character.weapon.name, "Weapon")}</div>
-              <div style={{ display: "flex", fontSize: 18, color: "#8f8fa6", marginTop: 6 }}>
-                {`${character.kind === "zzz" ? "W-Engine" : "Light Cone"} · Lv.${character.weapon.level} · ${
-                  character.kind === "zzz" ? `Effect ${character.weapon.effect}` : `S${character.weapon.effect}`
-                }`}
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        <div style={{ display: "flex", flexWrap: "wrap", marginTop: 16 }}>
-          {character.sets.map((set) => (
-            <div
-              key={set.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                padding: "10px 14px",
-                marginRight: 10,
-                marginBottom: 10,
-                borderRadius: 8,
-                background: "rgba(255,255,255,0.04)",
-                border: "1px solid rgba(255,255,255,0.07)",
-                fontSize: 18,
-                color: "#cfcbdd",
-              }}
-            >
-              {set.icon ? (
-                // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-                <img src={set.icon} width={26} height={26} style={{ marginRight: 10, objectFit: "contain" }} />
-              ) : null}
-              {`${set.pieces}pc ${safeName(set.name, "Set")}`}
-            </div>
-          ))}
-        </div>
-
-        {character.gear.length ? (
-          <div style={{ display: "flex", flexDirection: "column", marginTop: 8 }}>
-            <div style={{ display: "flex", fontSize: 15, letterSpacing: 3, color: "#6f6f86", marginBottom: 10 }}>
-              {character.kind === "zzz" ? "DRIVE DISCS" : "RELICS"}
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap" }}>
-              {character.gear.map((piece) => (
-                <div
-                  key={piece.slot}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    width: "50%",
-                    paddingRight: 12,
-                    marginBottom: 8,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      width: "100%",
-                      padding: "7px 10px",
-                      borderRadius: 7,
-                      background: "rgba(0,0,0,0.34)",
-                      fontSize: 15,
-                    }}
-                  >
-                    <div style={{ display: "flex", color: "#7a7a92", marginRight: 10 }}>{piece.slot}</div>
-                    <div style={{ display: "flex", color: "#cfcbdd", marginRight: 8 }}>{piece.main.label}</div>
-                    <div style={{ display: "flex", color: "#ffffff", marginLeft: "auto" }}>{piece.main.value}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div style={{ display: "flex", flexGrow: 1 }} />
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-            paddingTop: 18,
-            fontSize: 18,
-            color: "#6f6f86",
-          }}
-        >
-          <div style={{ display: "flex" }}>{safeName(profile.player.nickname, "Showcase")}</div>
-          <div style={{ display: "flex" }}>
-            {profile.player.uid === "manual" ? "Manual card" : "Showcase card"} ·{" "}
-            {characterSize(character).toUpperCase()}
-          </div>
-        </div>
-      </Frame>
-    ),
-    { width, height },
-  );
 }
 
 function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; game: Game }) {
@@ -411,7 +197,7 @@ export async function GET(
       ? portraitCard({ character: manualCharacter, profile: manualProfile, game })
       : detail
         ? detailCard({ character: manualCharacter, profile: manualProfile, game })
-        : SingleCard({ character: manualCharacter, profile: manualProfile, game });
+        : singleCard({ character: manualCharacter, profile: manualProfile, game });
     if (download) {
       const slug = manualCharacter.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
       const suffix = portrait ? "-portrait" : detail ? "-detail" : "";
@@ -454,7 +240,7 @@ export async function GET(
       ? portraitCard({ character, profile, game })
       : detail
         ? detailCard({ character, profile, game })
-        : SingleCard({ character, profile, game });
+        : singleCard({ character, profile, game });
     filename = `astra-${game}-${normalized}-${character.name
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")}${portrait ? "-portrait" : detail ? "-detail" : ""}.png`;
