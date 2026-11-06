@@ -32,18 +32,25 @@ export function SiteBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
       {art ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={art}
-          src={art}
-          alt=""
-          decoding="async"
-          className="absolute -top-[8%] right-[-18%] h-[98vh] w-auto max-w-none opacity-[0.2] transition-opacity duration-500 sm:right-[-6%] sm:h-[112vh] sm:opacity-[0.28]"
+        // Phones get the art as a band across the top: a 2:1 splash stretched over a
+        // tall viewport is cropped to an unrecognisable smear, so it keeps its width
+        // instead and the page fades up into it. Wider screens fill the viewport.
+        <div
+          className="absolute inset-x-0 top-0 h-[64vh] sm:inset-0 sm:h-full"
           style={{
-            maskImage: "linear-gradient(105deg, transparent 0%, rgba(0,0,0,0.4) 24%, #000 64%)",
-            WebkitMaskImage: "linear-gradient(105deg, transparent 0%, rgba(0,0,0,0.4) 24%, #000 64%)",
+            maskImage: "linear-gradient(100deg, transparent 0%, rgba(0,0,0,0.55) 28%, #000 68%)",
+            WebkitMaskImage: "linear-gradient(100deg, transparent 0%, rgba(0,0,0,0.55) 28%, #000 68%)",
           }}
-        />
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            key={art}
+            src={art}
+            alt=""
+            decoding="async"
+            className="h-full w-full max-w-none object-cover object-[58%_32%] opacity-[0.42] sm:object-[58%_30%]"
+          />
+        </div>
       ) : null}
       {/* Game light, so even the art-less routes carry the section's colour. */}
       <div
@@ -52,6 +59,8 @@ export function SiteBackdrop() {
       />
       <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-void/80 to-transparent" />
       <div className="absolute inset-x-0 bottom-0 h-[55vh] bg-gradient-to-b from-transparent via-void/70 to-void" />
+      {/* Softens the band's lower edge on phones; the viewport scrim above covers wider screens. */}
+      <div className="absolute inset-x-0 top-[32vh] h-[32vh] bg-gradient-to-b from-transparent via-void/60 to-void sm:hidden" />
     </div>
   );
 }
