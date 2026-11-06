@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CopyButton } from "./CopyButton";
 import { TeamCard } from "./TeamCard";
 import { TEAM_SIZE } from "@/lib/site";
@@ -34,7 +34,7 @@ export function TeamBuilder({
 
   const query = new URLSearchParams();
   if (picked.length) query.set("team", picked.join(","));
-  if (title.trim()) query.set("title", title.trim());
+  if (picked.length && title.trim()) query.set("title", title.trim());
   const shareUrl = `${shareBase}${query.toString() ? `?${query.toString()}` : ""}`;
   const pngUrl =
     `/api/card/${game}/${uid}?` +
@@ -45,18 +45,25 @@ export function TeamBuilder({
     }).toString();
 
   // Keep the address bar in step with the lineup, so copying the profile URL shares this team.
+  // A profile visit with no lineup built yet leaves the clean URL alone: this pane stays mounted
+  // behind the characters tab, and writing the placeholder title here would silently turn every
+  // profile link into one that opens on the team builder.
+  const synced = useRef(false);
   useEffect(() => {
+    if (!picked.length && !synced.current) return;
+    synced.current = true;
+
     const params = new URLSearchParams(window.location.search);
     if (picked.length) params.set("team", picked.join(","));
     else params.delete("team");
-    if (title.trim()) params.set("title", title.trim());
+    if (picked.length && title.trim()) params.set("title", title.trim());
     else params.delete("title");
+
     const search = params.toString();
-    window.history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${search ? `?${search}` : ""}`,
-    );
+    const next = `${window.location.pathname}${search ? `?${search}` : ""}`;
+    if (next !== `${window.location.pathname}${window.location.search}`) {
+      window.history.replaceState(null, "", next);
+    }
   }, [picked, title]);
 
   function toggle(id: string) {
