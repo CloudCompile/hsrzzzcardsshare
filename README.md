@@ -73,9 +73,9 @@ Everything third-party the site leans on, and where it stands:
 | Live showcase data | [Enka.Network](https://enka.network) API | Enka's API rules: custom `User-Agent`, no UID enumeration, honour `ttl`. All three are followed (`lib/enka.ts`). |
 | ZZZ agent / W-Engine / disc tables, names, icons | `EnkaNetwork/API-docs` store | Public docs repo; data is HoYoverse's. Baked into `lib/data/*.json` by `scripts/gen-data.mjs`. |
 | HSR characters, light cones, relics, traces, art | [Mar-7th/StarRailRes](https://github.com/Mar-7th/StarRailRes) | **AGPL-3.0.** Baked into `lib/data/*.json`; art and icons hotlinked from its jsDelivr CDN. |
-| Game names, character art, in-game icons | HoYoverse / miHoYo | © HoYoverse. Used uncredited-by-licence under the fan-project understanding, not an actual grant. |
-| Site backdrop, ZZZ | Game Rant (Valnet) | © Valnet / Game Rant. **Hotlinked with no licence granted** — the one asset here with no defensible basis. |
-| Site backdrop, HSR | HoYoLAB BBS upload | A user upload of HoYoverse key art. Hotlinked; the poster's upload, not an official asset URL. |
+| Game names, character art, in-game icons | HoYoverse / miHoYo | © HoYoverse. Used without a licence under the fan-project tolerance described in their fan-use policy, not a grant. |
+| Site backdrop, ZZZ | zenless.hoyoverse.com (`act-webstatic.hoyoverse.com`) | Official key visual, hotlinked from HoYoverse's own CDN. |
+| Site backdrop, HSR | hsr.hoyoverse.com (`act-webstatic.hoyoverse.com`) | Official key visual, hotlinked from HoYoverse's own CDN. |
 | Fonts — Chakra Petch, Inter, JetBrains Mono | Google Fonts via `next/font` | SIL Open Font License 1.1. Self-hosted at build time; the OFL text is not shipped with them. |
 | Next.js, React, Tailwind CSS | npm | MIT. |
 
@@ -89,5 +89,9 @@ Outstanding decisions:
   that copyleft reaches a site that only consumes the data is a question for someone qualified to
   answer it; the low-risk path is to switch the tables and art to Enka's own store, which has no
   such licence.
-- **The ZZZ backdrop is a press-site image.** Replace it with a HoYoverse-hosted asset (HoYoLAB's
-  upload CDN, as the HSR one uses) before the site gets traffic.
+- **Backdrop URLs are version-scoped.** Both point at the key visual from a specific version's
+  official site banner, so a future version will rotate the artwork away. Nothing breaks if the
+  file is removed — the layer just has no image — but the art should be refreshed per version.
+- **Monetisation changes the picture.** The fan-use basis here assumes no ads, shop, donations or
+  affiliate links. Adding any of those puts the site in a different category under HoYoverse's
+  policy.

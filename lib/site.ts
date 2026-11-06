@@ -32,14 +32,17 @@ export const GAMES: Record<
 export const TEAM_SIZE: Record<Game, number> = { zzz: 3, hsr: 4 };
 
 /**
- * Site backdrop art. Each game's page is dressed with one key art, so the site reads
- * as that game while you are in it. Both are the CDN's own resized webp/avif
- * variants, which keeps the layer under ~100 KB instead of the full-size original. Kept as URLs rather than bundled files: the art is licensed third-party
- * material the app links to, it is not redistributed here.
+ * Site backdrop art. Each game's page is dressed with one of the official key visuals
+ * from that game's own website, hotlinked off HoYoverse's own CDN. First-party art
+ * behind a fan-site disclaimer is what HoYoverse's fan-use policy tolerates; a
+ * press-site image is not. URLs rather than bundled files, since the art is not ours
+ * to redistribute.
+ *
+ * These are version-scoped paths, so a future version banner will rotate them away.
  */
 export const GAME_BACKDROP: Record<Game, string> = {
-  zzz: "https://static0.gamerantimages.com/wordpress/wp-content/uploads/2024/12/zenless-zone-zero-a-storm-of-falling-stars-miyabi.jpg",
-  hsr: "https://upload-os-bbs.hoyolab.com/upload/2025/01/03/40717305/cf81202113e38099323d48c05ea6d10f_5427875743258003648.jpg?x-oss-process=image%2Fresize%2Cs_1000%2Fauto-orient%2C0%2Finterlace%2C1%2Fformat%2Cwebp%2Fquality%2Cq_70",
+  zzz: "https://act-webstatic.hoyoverse.com/puzzle/zzz/pz_ZYBGoSIMEV/resource/puzzle/2026/10/08/3fda8ae46a697966e84e3ad46d22cf26_565055650122263887.png?x-oss-process=image/format,webp/quality,Q_90",
+  hsr: "https://act-webstatic.hoyoverse.com/puzzle/hkrpg/pz_sEswxe8sSg/resource/puzzle/2026/09/04/33367b8a124f5283012ba6afa614f003_8360406952295795431.png?x-oss-process=image/format,webp/quality,Q_90",
 };
 
 /**
