@@ -70,6 +70,10 @@ Everything third-party the site leans on, and where it stands:
 
 | What | Source | Terms |
 | --- | --- | --- |
+The agent relay is deliberately narrow: https only, `/chat/completions` only, 2 MB body cap, no
+redirects, a 60-second timeout, and a DNS check that refuses any host resolving to a private or
+loopback address. It still has no rate limit of its own.
+
 | Live showcase data | [Enka.Network](https://enka.network) API | Enka's API rules: custom `User-Agent`, no UID enumeration, honour `ttl`. All three are followed (`lib/enka.ts`). |
 | ZZZ agent / W-Engine / disc tables, names, icons | `EnkaNetwork/API-docs` store | Public docs repo; data is HoYoverse's. Baked into `lib/data/*.json` by `scripts/gen-data.mjs`. |
 | HSR characters, light cones, relics, traces, art | [Mar-7th/StarRailRes](https://github.com/Mar-7th/StarRailRes) | **AGPL-3.0.** Baked into `lib/data/*.json`; art and icons hotlinked from its jsDelivr CDN. |
