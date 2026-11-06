@@ -102,7 +102,9 @@ export function CharacterSheet({
                   <span>{character.kind === "zzz" ? character.profession : character.pathName}</span>
                   <span className="text-white/15">/</span>
                   <span>
-                    {character.kind === "zzz" ? `Core ${character.coreRank}` : `Eidolon ${character.eidolon}`}
+                    {character.kind === "zzz"
+                      ? `Core ${character.coreRank} · M${character.mindscape}`
+                      : `Eidolon ${character.eidolon}`}
                   </span>
                 </p>
               </div>
@@ -146,7 +148,7 @@ export function CharacterSheet({
             <StatGrid rows={character.sheet} columns={2} />
             <p className="mt-2 text-[10.5px] leading-relaxed text-faint">
               {character.kind === "zzz"
-                ? "Calculated from agent level, promotion, core skill, drive discs and 2pc set bonuses. W-Engine passives are not included."
+                ? "Calculated from agent level, promotion, core skill, W-Engine, drive discs and 2pc set bonuses. W-Engine passive effects are not included."
                 : "Calculated from character level, light cone, traces, relics and set bonuses."}
             </p>
             <div className="mt-3">
@@ -168,6 +170,15 @@ export function CharacterSheet({
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[13px] font-medium text-white/90">{character.weapon.name}</p>
+                  {character.weapon.stats?.length ? (
+                    <p className="num mt-0.5 flex flex-wrap gap-x-2 text-[11px] text-white/70">
+                      {character.weapon.stats.map((stat) => (
+                        <span key={stat.label}>
+                          <span className="text-faint">{stat.label}</span> {stat.value}
+                        </span>
+                      ))}
+                    </p>
+                  ) : null}
                   <p className="mt-0.5 flex items-center gap-1.5 text-[11px] text-muted">
                     <span className="num">Lv.{character.weapon.level}</span>
                     <span className="text-white/15">/</span>
@@ -175,7 +186,7 @@ export function CharacterSheet({
                     <span className="text-white/15">/</span>
                     <span>
                       {character.kind === "zzz"
-                        ? `Effect ${character.weapon.effect}`
+                        ? `W${character.weapon.modification ?? 1}`
                         : `S${character.weapon.effect}`}
                     </span>
                   </p>

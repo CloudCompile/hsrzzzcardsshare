@@ -193,10 +193,17 @@ function buildZzz(build: ManualBuild): Character | null {
 
   const sets: SetGroup[] = zzz.zzzBuildSets(suitCounts, acc);
   const rawElement = agent.elements[0] ?? "Physical";
+  const weaponStats = build.weapon
+    ? zzz.zzzWeaponStats(build.weapon, build.weaponLevel, build.weaponRank || 1)
+    : null;
+  if (weaponStats) {
+    for (const [id, value] of weaponStats.acc) acc.set(id, (acc.get(id) ?? 0) + value);
+  }
   const sheet = zzz.zzzBuildSheet(
     zzz.zzzBaseReader(build.char, build.level, build.promotion, build.rank),
     acc,
     rawElement,
+    weaponStats?.base,
   );
 
   const weaponMeta = build.weapon ? zzz.zzzWeaponMeta(build.weapon) : undefined;
@@ -213,6 +220,8 @@ function buildZzz(build: ManualBuild): Character | null {
     promotion: build.promotion,
     core: build.rank,
     coreRank: zzz.zzzCoreRank(build.rank),
+    mindscape: 0,
+    skillLevels: [],
     icon: agent.circle ?? agent.icon,
     portrait: agent.icon,
     accent: agent.accent,
@@ -226,6 +235,8 @@ function buildZzz(build: ManualBuild): Character | null {
           rarity: weaponMeta.rarity,
           level: build.weaponLevel,
           effect: build.weaponRank || 1,
+          modification: weaponStats?.modification ?? Math.max(0, build.weaponRank || 1),
+          stats: weaponStats?.stats,
           icon: weaponMeta.icon,
           subtitle: weaponMeta.profession,
           base: null,

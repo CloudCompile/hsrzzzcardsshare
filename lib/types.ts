@@ -40,6 +40,10 @@ export interface WeaponInfo {
   effect: number;
   icon: string | null;
   subtitle: string;
+  /** ZZZW-Engine modification rank (W1–W5). */
+  modification?: number;
+  /** The weapon's own stat lines, e.g. "Base ATK 291" / "ATK% 10.0%". */
+  stats?: GearSub[];
   /** The weapon's own base stats, when the source exposes them. */
   base?: { hp: number; atk: number; def: number } | null;
 }
@@ -79,6 +83,10 @@ export interface ZzzCharacter extends CharacterBase {
   promotion: number;
   core: number;
   coreRank: string;
+  /** Mindscape cinema level, 0–6. */
+  mindscape: number;
+  /** Per-skill levels, keyed by the game's own skill index. */
+  skillLevels: { index: number; level: number }[];
 }
 
 export interface HsrCharacter extends CharacterBase {

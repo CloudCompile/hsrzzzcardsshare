@@ -1,7 +1,7 @@
 import zzzJson from "./data/zzz.json";
 import { zzzElementColor, ZZZ_ELEMENT_LABELS } from "./site";
 import { fmtDecimal, fmtInt, fmtPct } from "./format";
-import type { GearPiece, SetGroup, ShowcaseProfile, StatRow, WeaponInfo, ZzzCharacter } from "./types";
+import type { GearPiece, GearSub, SetGroup, ShowcaseProfile, StatRow, WeaponInfo, ZzzCharacter } from "./types";
 
 export interface PropMeta {
   label: string;
@@ -56,6 +56,7 @@ export interface RawZzzAvatar {
   CoreSkillEnhancement: number;
   UpgradeId: number;
   WeaponEffectState: number;
+  SkillLevelList?: { Index: number; Level: number }[];
   EquippedList?: {
     Slot: number;
     Equipment: {
@@ -98,6 +99,15 @@ const CORE_RANKS = ["", "A", "B", "C", "D", "E", "F"];
 /** Drive disc values in the showcase are stored at +0; each level adds 20% of the base value. */
 const MAIN_LEVEL_SCALE = 0.2;
 
+/**
+ * W-Engine scaling, from Enka's API docs: the main stat grows with level and with
+ * modification rank (W1–W5), the sub stat only with modification rank. Checked
+ * against the in-game values (A-rank Lv.60 W1 = 416 ATK, S-rank Lv.60 ≈ 594).
+ */
+const WEAPON_MAIN_LEVEL = 0.1568166666666667;
+const WEAPON_MAIN_RANK = 0.8922;
+const WEAPON_SUB_RANK = 0.3;
+
 function propMeta(id: string): PropMeta | undefined {
   return data.stats[id];
 }
@@ -114,7 +124,9 @@ function isPct(id: string): boolean {
 
 /** The store labels percent props "Percent HP"; the card should read "HP%". */
 export function zzzPropLabel(id: string): string {
-  const label = data.stats[id]?.label ?? "Stat";
+  // Some labels ship with a non-breaking space ("Fire DMG Bonus"), which reads the
+  // same but breaks anything matching on whitespace.
+  const label = (data.stats[id]?.label ?? "Stat").replace(/\u00a0/g, " ");
   const percent = /^Percent (.+)$/.exec(label);
   if (percent) return `${percent[1]}%`;
   if (label === "Anomaly Proficiency") return "Anomaly Prof.";
@@ -141,17 +153,59 @@ function makeBaseReader(meta: AgentMeta, level: number, promotion: number, core:
   };
 }
 
-function buildWeapon(avatar: RawZzzAvatar): WeaponInfo | null {
+/**
+ * A W-Engine's own numbers at a level and modification rank. The main stat (base
+ * ATK on every engine) belongs in the agent's base stat, because percentage and
+ * flat bonuses apply on top of the two added together; the sub stat is an ordinary
+ * panel bonus.
+ */
+export function zzzWeaponStats(weaponId: string, level: number, rank: number) {
+  const meta = data.weapons[weaponId];
+  if (!meta) return null;
+
+  const modification = Math.max(0, Math.min(5, rank));
+  const stats: GearSub[] = [];
+  const base = new Map<string, number>();
+  const acc = new Map<string, number>();
+
+  if (meta.main) {
+    const scaled = meta.main.value * (1 + WEAPON_MAIN_LEVEL * level + WEAPON_MAIN_RANK * modification);
+    base.set(meta.main.id, scaled);
+    stats.push({ label: zzzPropLabel(meta.main.id), value: formatProp(meta.main.id, scaled) });
+  }
+  if (meta.sub) {
+    const scaled = meta.sub.value * (1 + WEAPON_SUB_RANK * modification);
+    acc.set(meta.sub.id, scaled);
+    stats.push({ label: zzzPropLabel(meta.sub.id), value: formatProp(meta.sub.id, scaled) });
+  }
+
+  return { modification, stats, base, acc };
+}
+
+function buildWeapon(
+  avatar: RawZzzAvatar,
+  acc: Map<string, number>,
+  base: Map<string, number>,
+): WeaponInfo | null {
   const raw = avatar.Weapon;
   if (!raw) return null;
   const meta = data.weapons[String(raw.Id)];
   if (!meta) return null;
+
+  const computed = zzzWeaponStats(String(raw.Id), raw.Level, raw.BreakLevel ?? 0);
+  if (!computed) return null;
+
+  for (const [id, value] of computed.base) base.set(id, (base.get(id) ?? 0) + value);
+  for (const [id, value] of computed.acc) add(acc, id, value);
+
   return {
     id: String(raw.Id),
     name: meta.name,
     rarity: meta.rarity,
     level: raw.Level,
     effect: avatar.WeaponEffectState || 1,
+    modification: computed.modification,
+    stats: computed.stats,
     icon: meta.icon,
     subtitle: meta.profession,
   };
@@ -239,10 +293,12 @@ const ELEMENT_DMG_PROP: Record<string, string> = {
 };
 
 function buildSheet(
-  baseAt: (id: string) => number,
+  agentBase: (id: string) => number,
   acc: Map<string, number>,
   element: string,
+  weaponBase?: Map<string, number>,
 ): StatRow[] {
+  const baseAt = (id: string) => agentBase(id) + (weaponBase?.get(id) ?? 0);
   const elementLabel = ZZZ_ELEMENT_LABELS[element] ?? element;
   const raw = (id: string) => acc.get(id) ?? 0;
   const pct = (id: string) => raw(id) / 100;
@@ -302,15 +358,21 @@ function buildSheet(
     });
   }
 
+  // Damage bonuses the gear actually carries. The agent's own element goes first,
+  // then anything else, read from the disc labels so elements the id table has
+  // never heard of still show up instead of vanishing.
+  const seen = new Set<string>();
   const dmgId = ELEMENT_DMG_PROP[element];
-  if (dmgId) {
-    const bonus = pct(dmgId);
-    if (bonus > 0) {
-      rows.push({
-        label: `${elementLabel} DMG`,
-        value: fmtPct(bonus),
-      });
-    }
+  if (dmgId && pct(dmgId) > 0) {
+    rows.push({ label: `${elementLabel} DMG`, value: fmtPct(pct(dmgId)) });
+    seen.add(dmgId);
+  }
+  for (const [id, value] of acc) {
+    if (seen.has(id) || value <= 0.5) continue;
+    const meta = propMeta(id);
+    const label = (meta?.label ?? "").replace(/\u00a0/g, " ");
+    if (!meta?.pct || !/dmg bonus$/i.test(label)) continue;
+    rows.push({ label: label.replace(/\s*bonus$/i, "").trim(), value: fmtPct(value / 100) });
   }
 
   return rows;
@@ -329,11 +391,13 @@ export function buildZzzProfile(raw: RawZzz, requestedUid: string): ShowcaseProf
 
     const baseAt = makeBaseReader(meta, avatar.Level, avatar.PromotionLevel, avatar.CoreSkillEnhancement);
     const acc = new Map<string, number>();
+    const weaponBase = new Map<string, number>();
     const { pieces, suitCounts } = buildGear(avatar, acc);
     const sets = buildSets(suitCounts, acc);
+    const weapon = buildWeapon(avatar, acc, weaponBase);
     const rawElement = meta.elements[0] ?? "Physical";
     const element = ZZZ_ELEMENT_LABELS[rawElement] ?? rawElement;
-    const sheet = buildSheet(baseAt, acc, rawElement);
+    const sheet = buildSheet(baseAt, acc, rawElement, weaponBase);
 
     characters.push({
       kind: "zzz",
@@ -347,13 +411,17 @@ export function buildZzzProfile(raw: RawZzz, requestedUid: string): ShowcaseProf
       promotion: avatar.PromotionLevel,
       core: avatar.CoreSkillEnhancement,
       coreRank: CORE_RANKS[Math.max(0, Math.min(6, avatar.CoreSkillEnhancement))] || "—",
+      mindscape: Math.max(0, Math.min(6, avatar.TalentLevel ?? 0)),
+      skillLevels: (avatar.SkillLevelList ?? [])
+        .map((skill) => ({ index: skill.Index, level: skill.Level }))
+        .sort((a, b) => a.index - b.index),
       icon: meta.circle ?? meta.icon,
       portrait: meta.icon,
       accent: meta.accent,
       sheet,
       sets,
       gear: pieces,
-      weapon: buildWeapon(avatar),
+      weapon,
     });
   }
 

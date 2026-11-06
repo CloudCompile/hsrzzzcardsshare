@@ -39,7 +39,8 @@ export function buildSystemPrompt({
     game === "zzz"
       ? [
           "Panel numbers come from agent level, promotion, core skill, drive discs and 2pc set bonuses.",
-          "W-Engine stat values are not published by the API, so they are NOT included in the panel totals. Never blame a total on the W-Engine as if it were miscalculated.",
+          "Panel totals include the W-Engine's base stat at its shown level and its sub stat at its modification rank (W1–W5).",
+          "W-Engine passive effect text is not available, and neither are 4pc set effects. Never describe what an engine's passive or a set's 4pc does.",
           "Only 3 agents are pinned to a ZZZ showcase, so you cannot see the rest of their roster.",
           "Teams hold 3 agents.",
         ]

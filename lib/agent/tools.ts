@@ -136,8 +136,12 @@ function roleOf(character: Character): string {
 function weaponLine(character: Character): string {
   const weapon = character.weapon;
   if (!weapon) return "none equipped";
-  const rank = character.kind === "zzz" ? `Effect ${weapon.effect}` : `S${weapon.effect}`;
-  return `${weapon.name} · ${weapon.rarity}★ · Lv.${weapon.level} · ${rank}`;
+  const head = `${weapon.name} · ${weapon.rarity}★ · Lv.${weapon.level}`;
+  if (character.kind === "zzz") {
+    const stats = (weapon.stats ?? []).map((stat) => `${stat.label} ${stat.value}`).join(", ");
+    return `${head} · W${weapon.modification ?? 1}${stats ? ` · ${stats}` : ""} · passive on/off: ${weapon.effect}`;
+  }
+  return `${head} · S${weapon.effect}`;
 }
 
 function digest(character: Character) {
@@ -180,6 +184,12 @@ function detail(character: Character) {
       name: set.name,
       bonus: set.bonus,
     })),
+    ...(character.kind === "zzz"
+      ? {
+          mindscape: character.mindscape,
+          skillLevels: character.skillLevels.map((skill) => `index ${skill.index}: Lv.${skill.level}`),
+        }
+      : {}),
   };
 }
 
@@ -273,7 +283,7 @@ export async function runTool(
         : null,
       gameNotes:
         context.game === "zzz"
-          ? "ZZZ panel totals here exclude W-Engine stat values and only include 2pc set bonuses."
+          ? "ZZZ panel totals include the W-Engine's base stat and sub stat, the discs and 2pc set bonuses. W-Engine passive text and 4pc set effects are not available, so do not describe them."
           : "HSR panel totals include the light cone, relics and set bonuses.",
     });
   }

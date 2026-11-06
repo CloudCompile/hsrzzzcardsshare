@@ -29,7 +29,7 @@ npm run data   # node scripts/gen-data.mjs
 ## Stat notes
 
 - **HSR**: panel stats are computed as `(base + light cone base) × (1 + ratios) + flat`, from level/promotion curves, relic props, light-cone props and unlocked trace stats. Base HP/ATK/DEF are scaled by `1.8846`, the ratio between Enka's live level-80 base stats and the promotion tables (verified across all light cones on the sample account).
-- **ZZZ**: drive disc values in the showcase are stored at +0 and scale by `1 + 0.2 × level`; sub stats are per-roll values × roll count. Panels combine agent level, promotion, core skill, discs and 2pc set bonuses. W-Engine stat scaling isn't exposed by the API, so those bonuses are not added to the totals.
+- **ZZZ**: drive disc values in the showcase are stored at +0 and scale by `1 + 0.2 × level`; sub stats are per-roll values × roll count. Panels combine agent level, promotion, core skill, W-Engine, discs and 2pc set bonuses. W-Engine stats use Enka's documented scaling — main stat `base × (1 + 0.1568166667 × level + 0.8922 × modification)`, sub stat `base × (1 + 0.3 × modification)` — which reproduces the in-game values (A-rank Lv.60 W1 = 416 ATK, S-rank Lv.60 ≈ 594). The API carries no W-Engine passive text and no 4pc set effects, so neither is modelled.
 
 ## Local data
 

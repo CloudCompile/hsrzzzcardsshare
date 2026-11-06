@@ -263,10 +263,18 @@ function WeaponPanel({ weapon, kind }: { weapon: WeaponInfo; kind: Game }) {
         </div>
         <div style={{ display: "flex", fontSize: 11.5, color: "#8f8fa6", marginTop: 3 }}>
           {`${kind === "zzz" ? "W-Engine" : "Light cone"} · ${
-            kind === "zzz" ? `Effect ${weapon.effect}` : `S${weapon.effect}`
+            kind === "zzz" ? `W${weapon.modification ?? 1}` : `S${weapon.effect}`
           } · Lv. ${weapon.level}`}
         </div>
-        {weapon.base ? (
+        {weapon.stats?.length ? (
+          <div style={{ display: "flex", marginTop: 4, fontSize: 11.5, color: "#cfcbdd" }}>
+            {weapon.stats.map((stat) => (
+              <div key={stat.label} style={{ display: "flex", marginRight: 10 }}>
+                {`${stat.label} ${stat.value}`}
+              </div>
+            ))}
+          </div>
+        ) : weapon.base ? (
           <div style={{ display: "flex", marginTop: 4, fontSize: 11.5, color: "#cfcbdd" }}>
             <div style={{ display: "flex", marginRight: 10 }}>{`HP ${fmtInt(weapon.base.hp)}`}</div>
             <div style={{ display: "flex", marginRight: 10 }}>{`ATK ${fmtInt(weapon.base.atk)}`}</div>
@@ -307,7 +315,7 @@ export function detailCard({
 
   const identity =
     character.kind === "zzz"
-      ? `${character.profession} · Core ${character.coreRank}`
+      ? `${character.profession} · Core ${character.coreRank} · M${character.mindscape}`
       : `${character.pathName} · E${character.eidolon}`;
   const maxLevel = character.kind === "zzz" ? 60 : 80;
   const gearLabel = character.kind === "zzz" ? "DRIVE DISCS" : "RELICS";
@@ -459,7 +467,7 @@ export function detailCard({
           >
             <div style={{ display: "flex" }}>
               {character.kind === "zzz"
-                ? "Level, promotion, core skill, discs and 2pc sets. W-Engine passives excluded."
+                ? "Level, promotion, core skill, W-Engine, discs and 2pc sets. W-Engine passive excluded."
                 : "Level, light cone, traces, relics and set bonuses."}
             </div>
           </div>
@@ -701,7 +709,7 @@ export function portraitCard({
               <div style={{ display: "flex", color: accent, marginLeft: 12 }}>{character.element}</div>
               <div style={{ display: "flex", color: "#8f8fa6", marginLeft: 10 }}>
                 {character.kind === "zzz"
-                  ? `${character.profession} · Core ${character.coreRank}`
+                  ? `${character.profession} · Core ${character.coreRank} · M${character.mindscape}`
                   : `${character.pathName} · E${character.eidolon}`}
               </div>
             </div>
