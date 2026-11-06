@@ -3,7 +3,7 @@ import { getShowcase, normalizeUid } from "@/lib/enka";
 import { buildManualProfile, manualCatalog } from "@/lib/manual";
 import { decodeBuild } from "@/lib/manualCodec";
 import { imageAspect } from "@/lib/cards/artSize";
-import { CardFrame, SplashArt, detailCard, portraitCard, singleCard } from "@/lib/cards/detail";
+import { CardBackdrop, CardFrame, SplashArt, detailCard, portraitCard, singleCard } from "@/lib/cards/detail";
 import { applyCharacterEdit, decodeEdits, singleEdit } from "@/lib/edits";
 import { teamCard } from "@/lib/cards/team";
 import { GAMES, TEAM_SIZE, isGame } from "@/lib/site";
@@ -181,6 +181,7 @@ async function ProfileCardImage({ profile, game }: { profile: ShowcaseProfile; g
           overflow: "hidden",
         }}
       >
+        <CardBackdrop width={width} height={height} accent={accent} />
         {hero ? (
           <SplashArt character={hero} width={width} height={height} aspect={aspect} focus={hero.kind === "zzz" ? 0.03 : 0} />
         ) : null}

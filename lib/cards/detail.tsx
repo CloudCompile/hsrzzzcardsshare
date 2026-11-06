@@ -76,6 +76,47 @@ export function SplashArt({
   );
 }
 
+/**
+ * The ground the card sits on. The roster art is transparent, so without this the
+ * character stands on flat black and the card reads as a cutout: a touch of light
+ * behind the art, a cool counter-wash at the far corner, and dark edges that keep
+ * the frame from looking unlit.
+ */
+export function CardBackdrop({ width, height, accent }: { width: number; height: number; accent: string }) {
+  const layer = { position: "absolute" as const, top: 0, left: 0, width, height, display: "flex" };
+  return (
+    <>
+      <div style={{ ...layer, background: `linear-gradient(180deg, #1b1b2b 0%, #0e0e18 44%, ${BG} 100%)` }} />
+      {/* Halo behind the figure, so the silhouette has something to sit in front of. */}
+      <div
+        style={{
+          ...layer,
+          background: `radial-gradient(58% 40% at 52% 24%, ${accent}52 0%, ${accent}1f 44%, rgba(7,7,12,0) 74%)`,
+        }}
+      />
+      <div
+        style={{
+          ...layer,
+          background: `linear-gradient(148deg, ${accent}38 0%, ${accent}14 28%, rgba(7,7,12,0) 58%)`,
+        }}
+      />
+      <div
+        style={{
+          ...layer,
+          background: "linear-gradient(328deg, rgba(140,138,255,0.22) 0%, rgba(7,7,12,0) 44%)",
+        }}
+      />
+      <div
+        style={{
+          ...layer,
+          background:
+            "linear-gradient(90deg, rgba(4,4,9,0.6) 0%, rgba(4,4,9,0) 15%, rgba(4,4,9,0) 85%, rgba(4,4,9,0.6) 100%)",
+        }}
+      />
+    </>
+  );
+}
+
 /** Hairline frame plus two accent ticks, so the card reads as a card and not a crop. */
 export function CardFrame({ width, height, accent }: { width: number; height: number; accent: string }) {
   return (
@@ -489,6 +530,7 @@ export async function detailCard({
           overflow: "hidden",
         }}
       >
+        <CardBackdrop width={width} height={height} accent={accent} />
         <SplashArt character={character} width={width} height={height} aspect={aspect} focus={isZzz ? 0.06 : 0} opacity={0.85} />
 
         {/* Scrims: readable text on the left, readable panels on the right, art between. */}
@@ -707,6 +749,7 @@ export async function portraitCard({
           overflow: "hidden",
         }}
       >
+        <CardBackdrop width={width} height={height} accent={accent} />
         <SplashArt character={character} width={width} height={height} aspect={aspect} focus={isZzz ? 0.02 : 0} />
         <div
           style={{
@@ -849,6 +892,7 @@ export async function singleCard({
           overflow: "hidden",
         }}
       >
+        <CardBackdrop width={width} height={height} accent={accent} />
         <SplashArt character={character} width={width} height={height} aspect={aspect} focus={isZzz ? 0.02 : 0} />
 
         {/* A long dissolve: the art keeps showing behind the panel instead of ending
