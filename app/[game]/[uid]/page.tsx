@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProfileView } from "@/components/ProfileView";
-import { ERROR_COPY, errorFromUnknown, getShowcase, normalizeUid } from "@/lib/enka";
+import {
+  ERROR_COPY,
+  errorFromUnknown,
+  getShowcase,
+  normalizeUid,
+  type ShowcaseErrorCode,
+} from "@/lib/enka";
 import { cardImage } from "@/lib/meta";
 import { GAMES, isGame } from "@/lib/site";
 
@@ -119,18 +125,28 @@ export default async function ProfilePage({ params, searchParams }: PageProps) {
   } catch (error) {
     const showcaseError = errorFromUnknown(error);
     const copy = ERROR_COPY[showcaseError.code] ?? ERROR_COPY.upstream;
-    return <ErrorScreen game={game} uid={normalized} title={copy.title} body={copy.body} />;
+    return (
+      <ErrorScreen
+        game={game}
+        uid={normalized}
+        code={showcaseError.code}
+        title={copy.title}
+        body={copy.body}
+      />
+    );
   }
 }
 
 function ErrorScreen({
   game,
   uid,
+  code,
   title,
   body,
 }: {
   game: "zzz" | "hsr";
   uid: string;
+  code?: ShowcaseErrorCode;
   title: string;
   body: string;
 }) {
@@ -155,6 +171,21 @@ function ErrorScreen({
           </p>
           <h1 className="mt-2 font-display text-2xl font-semibold">{title}</h1>
           <p className="mt-3 text-[13px] leading-relaxed text-muted">{body}</p>
+          {code === "maintenance" && (
+            <p className="mt-3 text-[12px] leading-relaxed text-faint">
+              That flag comes from Enka.Network, not from this site — the game can be perfectly
+              playable while their API still refuses requests. Check their{" "}
+              <a
+                href="https://status.enka.network/"
+                target="_blank"
+                rel="noreferrer"
+                className="underline decoration-dotted"
+              >
+                status page
+              </a>{" "}
+              before assuming a maintenance window.
+            </p>
+          )}
           <div className="mt-6 flex flex-wrap justify-center gap-2">
             <Link href={`/${game}/${uid}`} className="btn btn-primary px-4 py-2 text-[12px]">
               Try again
